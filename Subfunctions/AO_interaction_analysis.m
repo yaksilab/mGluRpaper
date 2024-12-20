@@ -1,5 +1,82 @@
 function [general_ratio, general_ratio_resp, collected_dff, int_code_per_fish, interaction_code_coll, all_fractions, all_fract_fish, fraction_resp, all_fraction_enh, all_fraction_supr] = AO_interaction_analysis(all_dfftrialw_wt,brain_regions_wt, position_wt, resp_list_wt_dff_std, no_con, ...
-    con_trials, cmap2, save_path, groupname, stim_period, dorsomed, plotting, thresh_dormedneurons_wt,  method)
+    con_trials, cmap2, save_path, groupname, stim_period, dorsomed, plotting, thresh_dormedneurons_wt,  method, brainnumber)
+%AO_interaction_analysis - Calcualte the interaction types
+%   Author: Anna Maria Ostenrath
+%   Optional file header info (to give more details about the function than in the H1 line)
+%   Optional file header info (to give more details about the function than in the H1 line)
+%
+%   Syntax:
+%       [general_ratio, general_ratio_resp, collected_dff, int_code_per_fish, interaction_code_coll, all_fractions, all_fract_fish, fraction_resp, all_fraction_enh, all_fraction_supr] = AO_interaction_analysis(all_dfftrialw_wt,brain_regions_wt, position_wt, resp_list_wt_dff_std, no_con, ...
+%   con_trials, cmap2, save_path, groupname, stim_period, dorsomed, plotting, thresh_dormedneurons_wt,  method, brainnumber)
+%       output = function(input1, input2, input3)
+%
+%   Description:
+%       function() - description
+%    
+%   Inputs:
+%       all_dfftrialw_wt - cell array with the dff data for each fish 
+%       brain_regions_wt - cell array with the brain region index for each
+%       fish
+%       position_wt - cell array with the positions for each
+%       fish (1:x, 2:y, 3:z, 4:neuron index, 5:plane index)
+%       resp_list_wt_dff_std - cell array with the response list for each
+%       fish (each fish has as array with no_neurons x no_con with
+%       1:positive, 0 non-resp and -1 neg responding)
+%       no_con - number of different conditions
+%       con_trials - indicators which trials belong to which condition
+%       cmap2 - colormap for plotting
+%       save_path - string folder path for saving the figure
+%       groupname - cell array with a string for each group
+%       stim_period - list of indices that should be considered as the
+%       responding period (eg. 10s after stimulus onset)
+%       dorsomed - 1 or 0 if you only want to look at the dorsomed cells
+%       (only works with brainnumber = 11 (Hb))
+%       plotting - 1 or 0 if you want to plot the traces for the different
+%       interaction types 
+%       thresh_dormedneurons_wt - cell array with a list for each fish
+%       which cells as dorsomed and which not
+%       method - 1: peak and 2: mean 3: msc 4: int index, 4 is the standard
+%       brainnumber - int which brain region to consider (e.g. 11 for Hb)
+%       if 0 you will look at all the cells detected
+%
+%   Outputs:
+%       general_ratio - array with fish x 3 types (dimension 1:superadditiv,
+%       2:subadditive, 3: repsonse depressed)
+%       general_ratio_resp - only for the responding cells array with fish x 3 types (1:superadditiv,
+%       2:subadditive, 3: repsonse depressed
+%       collected_dff - dff list combined of all cells of all fish (in the group) for each trial 
+%       int_code_per_fish - cell array with a list for each fish that gives
+%       the interaction identity of each neuron (1:superadditiv,
+%       0:subadditive, -1: repsonse depressed)
+%       interaction_code_coll - list for all the cells of all the fish that gives
+%       the interaction identity of each neuron (1:superadditiv,
+%       0:subadditive, -1: repsonse depressed)
+%       all_fractions - list of the interaction index of all the cells of all the fish
+%       all_fract_fish - cell array with list of the interaction index of
+%       the cells in each fish
+%       fraction_resp - list of the interaction index of all the cells of
+%       all the fish for only positively responding cells
+%       all_fraction_enh - list of the interaction index of all the cells of
+%       all the fish for only super-additive neurons
+%       all_fraction_supr - list of the interaction index of all the cells of
+%       all the fish for only response depressed neurons
+%
+%   Examples: 
+%           [general_ratio{group,1}, general_ratio_resp{group,1}, collected_dff{group,1}, int_code_per_fish{group,1}, interaction_code_coll{group,1}, all_fractions{group,1}, all_fract_fish{group,1},fraction_resp{group,1}, all_fraction_enh{group,1}, all_fraction_supr{group,1}] = AO_interaction_analysis(dff_trialwise{group,1}, brain_regions{group,1}, positions{group,1}, resp_period_list{group,1}, no_con, ...
+%      con_trials, cmap1, save_path, group_names{group}, stim_period, dorsomed, plotting, thresh_neu{group,1},  method, brainnumber);
+%       
+%      
+%
+%   Other m-files required: none
+%   Subfunctions: none
+%   MAT-files required: none
+%
+%   See also: calculate_responding_diff_periods
+%   Author: Anna Maria Ostenrath 
+%   Date : November 2024	
+
+
+
 
 % In this function I will take a look at the interation between the two
 % stimulus conditions using either method 1 : peak detection or method 2:
@@ -19,14 +96,13 @@ all_fraction_supr = [];
 
 for fish = 1:size(all_dfftrialw_wt,2)
 
-    brainnumber = 11; 
-
     current_dff = all_dfftrialw_wt{1,fish};
-    % current_dff = all_dffs_wt{1,fish};
-    current_hab = current_dff(:,:,find(brain_regions_wt{1,fish} == brainnumber));
-    % current_hab = current_dff;%(:,:,find(brain_regions_wt{1,fish} == brainnumber)); 
+    if brainnumber == 0
+        current_hab = current_dff;
+    else
+        current_hab = current_dff(:,:,find(brain_regions_wt{1,fish} == brainnumber));
+    end
 
-    % current_hab = current_dff(find(brain_regions_wt{1,fish} == brainnumber),:); 
 
     hab_positions = position_wt{1,fish}(find(brain_regions_wt{1,fish} == brainnumber),:);
     try

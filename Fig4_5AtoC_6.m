@@ -191,7 +191,6 @@ end
 
 %% Uni vs. Mulitmodal cells (Selectivity)
 
-%%%% maybe cut out the non positive responding cells 
 
 % first I could just collect all of the dff values both for the heatmap and
 % for the scatter plot
@@ -779,13 +778,15 @@ fraction_resp = cell(3,1);
 dorsomed = 0;
 plotting = 0; 
 method = 4; % Method 1: peak and 2: mean 3: msc 4: int index
+brainnumber = 11; 
+
 stim_period = diff_stim_period(1,:); 
 all_fraction_enh = cell(3,1);
 all_fraction_supr = cell(3,1);
 for group = 1:no_group 
 
     [general_ratio{group,1}, general_ratio_resp{group,1}, collected_dff{group,1}, int_code_per_fish{group,1}, interaction_code_coll{group,1}, all_fractions{group,1}, all_fract_fish{group,1},fraction_resp{group,1}, all_fraction_enh{group,1}, all_fraction_supr{group,1}] = AO_interaction_analysis(dff_trialwise{group,1}, brain_regions{group,1}, positions{group,1}, resp_period_list{group,1}, no_con, ...
-       con_trials, cmap2, save_path, group_names{group}, stim_period, dorsomed, plotting, thresh_neu{group,1},  method);
+       con_trials, cmap2, save_path, group_names{group}, stim_period, dorsomed, plotting, thresh_neu{group,1},  method, brainnumber);
 
 end
 

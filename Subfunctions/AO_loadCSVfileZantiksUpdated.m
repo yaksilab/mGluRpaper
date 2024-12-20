@@ -1,4 +1,4 @@
-function [data] = AO_loadCSVfileZantiks(data_path, cfg, T)
+function [data] = AO_loadCSVfileZantiksUpdated(data_path, cfg, T, wrongsheet, restricted, foldername)
 %AO_loadCSVfileZantiks - One line description of what the function or script performs (H1 line)
 %   Author: Anna Maria Ostenrath
 %   Optional file header info (to give more details about the function than in the H1 line)
@@ -108,6 +108,33 @@ distance = readtable([data_path stk_files_dist.name], opts);
 
 % Clear temporary variables
 clear opts
+
+if wrongsheet
+
+    % number of column to import is 4 plus the number of arena
+    NumColumn=4+cfg.NumberArena +1;
+    opts = delimitedTextImportOptions("NumVariables", NumColumn);
+    
+    % Specify range and delimiter
+    opts.DataLines = [5, Inf]; %the line 1 is the text on the CSV file. We only import from line 2
+    opts.Delimiter = ",";
+    
+    % Specify column names and types
+    opts.VariableNames = ["RUNTIME", "TEMPERATURE", "LIGHT", repmat("well",1,cfg.NumberArena+1)];
+    opts.VariableTypes = ["double", "double", "string", repmat("double",1,cfg.NumberArena+1)];
+    
+    % Specify file level properties
+    opts.ExtraColumnsRule = "ignore";
+    opts.EmptyLineRule = "read";
+    
+    % Import the distance data
+    distance2 = readtable([data_path stk_files_dist.name], opts);
+    
+    % Clear temporary variables
+    clear opts
+
+
+end
 %% Import the metadata of the experiments, aka date, machine ID
 
 fileID = fopen([data_path stk_files_dist.name]);
@@ -129,13 +156,16 @@ data{i,1}.metadata=metadata;
 data{i,1}.ArenaNumber=i;
 end
 
+
+
+
 %% Adding some extra data from the table
 % so now I need to find the right fish in the table T
 % I need to identify the right index in the table 
-pathparts = strsplit(data_path,filesep); %%%% changed this for the new exp!! 
+% pathparts = strsplit(data_path,filesep); %%%% changed this for the new exp!! 
 % exp_name = pathparts{5};
-exp_name = pathparts{4};
-cur_exp_no = str2num(exp_name([5]));
+exp_name = foldername; % pathparts{4};
+cur_exp_no =  str2num(exp_name([4:5]));
 % if length(exp_name) == 12
 %     cur_exp_no = str2num(exp_name(6));
 % else
@@ -159,7 +189,50 @@ for no_fish=1:cfg.NumberArena
     data{no_fish,1}.fishNo = T.Fish(table_idx(no_fish)); 
     data{no_fish,1}.stableVib = T.Stable_V(table_idx(no_fish)); 
 end
+if restricted
+    if cur_exp_no == 1 || cur_exp_no == 2
+        disp(['Changing it for Exp ', num2str(cur_exp_no)])
+        if wrongsheet
+            for i=1:cfg.NumberArena
+                data2{i,1}.binTime=table2array(distance2(:,1));
+                data2{i,1}.binTemperature=table2array(distance2(:,2));
+                data2{i,1}.binDistance=table2array(distance2(:,3+i+1));
+                data2{i,1}.binStimulus=distance2(:,3);
+                data2{i,1}.metadata=metadata;
+                data2{i,1}.ArenaNumber=i;
+            end
+        
+            index_tostart = find(distance2.LIGHT == "PRETRIAL");
+            index_tostart = index_tostart(1); 
+        
+            for i=1:cfg.NumberArena
+                data{i,1}.binDistance(index_tostart:end) = data2{i,1}.binDistance(index_tostart:end); 
+            end
+            clear distance2 data2
+        end
+    end
+else 
+     if wrongsheet
+        for i=1:cfg.NumberArena
+            data2{i,1}.binTime=table2array(distance2(:,1));
+            data2{i,1}.binTemperature=table2array(distance2(:,2));
+            data2{i,1}.binDistance=table2array(distance2(:,3+i+1));
+            data2{i,1}.binStimulus=distance2(:,3);
+            data2{i,1}.metadata=metadata;
+            data2{i,1}.ArenaNumber=i;
+        end
+    
+        index_tostart = find(distance2.LIGHT == "PRETRIAL");
+        index_tostart = index_tostart(1); 
+    
+        for i=1:cfg.NumberArena
+            data{i,1}.binDistance(index_tostart:end) = data2{i,1}.binDistance(index_tostart:end); 
+        end
+        clear distance2 data2
+    end
 
+
+end
 %% Stimulus train should also be recorded
 
 % Light stimulus 
@@ -193,85 +266,85 @@ for no_fish=1:cfg.NumberArena
    
 end
 
-% %% Velo
-% % Rebin the distance 
-% velBin = 0.5; 
-% % len_velo_trace = length(fish_speed(new_time>floor(stim_times(1))-duration & new_time<floor(stim_times(1))+duration));  % double check why you floor it
-% 
-% for no_fish=1:length(data) %parfor
-%     % Load variables
-%     t           = data{no_fish,1}.time;
-%     dt          = diff(data{no_fish, 1}.time); %diff(all_fish{fish, 1}.time);
-% %     s           = all_fish{fish,1}.binDistance;
-%     n_bins      = floor(max(data{no_fish,1}.time)/velBin);
-%     
-%     % calculate the distance 
-%     s = sqrt(diff(data{no_fish, 1}.x).^2 + diff(data{no_fish, 1}.y).^2);
-%     % Calculate speed over time and delta-time
-%     V1 = nan(1,length(dt));
-%     for j=1:length(dt)-1
-%         V1(j)= (s(j+1))/dt(j);
-%     end
-%     
-%     %Calculate velocity per second
-%     start_tim = t(1);
-%     bV_temp=nan(1,n_bins);
-% %     disp(ROI)
-%     new_time = [];
-%     for i=1:n_bins
-% %         disp(i)
-%         new_time = [new_time; start_tim + (i-1)*velBin];
-%         try
-%             bV_temp(i)= sum(s(t>(i-1)*velBin & t<=i*velBin))/...
-%                         sum(dt(t>(i-1)*velBin & t<=i*velBin));
-%         catch
-%             disp('Here is weird thing with dt and length of t')
-%             disp(no_fish)
-%             disp(i)
-%             bV_temp(i) = nan; 
-%         end
-%     end
-%     % Save data inn cell array
-%     data{no_fish,1}.speed_over_time                   =   V1;
-%     if velBin < 1
-%         velo_string = num2str(velBin); 
-%         velo_string(2) = '_';
-%         data{no_fish,1}.(['binnedVel_' velo_string])  =   bV_temp;
-%         data{no_fish,1}.(['speed_over_time_' velo_string])  =   V1;
-%         data{no_fish,1}.(['new_time_' velo_string])  =   new_time;
-%     else
-%         data{no_fish,1}.(['binnedVel_' num2str(velBin)])  =   bV_temp;
-%         data{no_fish,1}.(['speed_over_time_' num2str(velBin)]) =   V1;
-%         data{no_fish,1}.(['new_time_'  num2str(velBin)])  =   new_time;
-%     end
-% 
-%     % and then i could also already do the new stimulus onsets...
-%     for trial = 1:length(data{no_fish,1}.LDSstimuliOnset)
-%         new_on = find(new_time < data{no_fish,1}.binTime(data{no_fish,1}.LDSstimuliOnset(trial)));
-%         new_on = new_on(end); 
-%         data{no_fish,1}.LDS_stimOnset_bin(trial,1) = new_on; 
-% 
-% 
-%     end
-% 
-%     for trial = 1:length(data{no_fish,1}.LDSstimuliOffset)
-%         new_on = find(new_time < data{no_fish,1}.binTime(data{no_fish,1}.LDSstimuliOffset(trial)));
-%         new_on = new_on(end); 
-%         data{no_fish,1}.LDS_stimOffset_bin(trial,1) = new_on; 
-% 
-% 
-%     end
-% 
-%      for trial = 1:length(data{no_fish,1}.VibstimuliOnset)
-%         new_on = find(new_time < data{no_fish,1}.binTime(data{no_fish,1}.VibstimuliOnset(trial)));
-%         new_on = new_on(end); 
-%         data{no_fish,1}.Vib_stimOn_bin(trial,1) = new_on; 
-% 
-% 
-%     end
-% 
-% 
-% end
+%% Velo
+% Rebin the distance 
+velBin = 0.5; 
+% len_velo_trace = length(fish_speed(new_time>floor(stim_times(1))-duration & new_time<floor(stim_times(1))+duration));  % double check why you floor it
+
+for no_fish=1:length(data) %parfor
+    % Load variables
+    t           = data{no_fish,1}.time;
+    dt          = diff(data{no_fish, 1}.time); %diff(all_fish{fish, 1}.time);
+%     s           = all_fish{fish,1}.binDistance;
+    n_bins      = floor(max(data{no_fish,1}.time)/velBin);
+    
+    % calculate the distance 
+    s = sqrt(diff(data{no_fish, 1}.x).^2 + diff(data{no_fish, 1}.y).^2);
+    % Calculate speed over time and delta-time
+    V1 = nan(1,length(dt));
+    for j=1:length(dt)-1
+        V1(j)= (s(j+1))/dt(j);
+    end
+    
+    %Calculate velocity per second
+    start_tim = t(1);
+    bV_temp=nan(1,n_bins);
+%     disp(ROI)
+    new_time = [];
+    for i=1:n_bins
+%         disp(i)
+        new_time = [new_time; start_tim + (i-1)*velBin];
+        try
+            bV_temp(i)= sum(s(t>(i-1)*velBin & t<=i*velBin))/...
+                        sum(dt(t>(i-1)*velBin & t<=i*velBin));
+        catch
+            disp('Here is weird thing with dt and length of t')
+            disp(no_fish)
+            disp(i)
+            bV_temp(i) = nan; 
+        end
+    end
+    % Save data inn cell array
+    data{no_fish,1}.speed_over_time                   =   V1;
+    if velBin < 1
+        velo_string = num2str(velBin); 
+        velo_string(2) = '_';
+        data{no_fish,1}.(['binnedVel_' velo_string])  =   bV_temp;
+        data{no_fish,1}.(['speed_over_time_' velo_string])  =   V1;
+        data{no_fish,1}.(['new_time_' velo_string])  =   new_time;
+    else
+        data{no_fish,1}.(['binnedVel_' num2str(velBin)])  =   bV_temp;
+        data{no_fish,1}.(['speed_over_time_' num2str(velBin)]) =   V1;
+        data{no_fish,1}.(['new_time_'  num2str(velBin)])  =   new_time;
+    end
+
+    % and then i could also already do the new stimulus onsets...
+    for trial = 1:length(data{no_fish,1}.LDSstimuliOnset)
+        new_on = find(new_time < data{no_fish,1}.binTime(data{no_fish,1}.LDSstimuliOnset(trial)));
+        new_on = new_on(end); 
+        data{no_fish,1}.LDS_stimOnset_bin(trial,1) = new_on; 
+
+
+    end
+
+    for trial = 1:length(data{no_fish,1}.LDSstimuliOffset)
+        new_on = find(new_time < data{no_fish,1}.binTime(data{no_fish,1}.LDSstimuliOffset(trial)));
+        new_on = new_on(end); 
+        data{no_fish,1}.LDS_stimOffset_bin(trial,1) = new_on; 
+
+
+    end
+
+     for trial = 1:length(data{no_fish,1}.VibstimuliOnset)
+        new_on = find(new_time < data{no_fish,1}.binTime(data{no_fish,1}.VibstimuliOnset(trial)));
+        new_on = new_on(end); 
+        data{no_fish,1}.Vib_stimOn_bin(trial,1) = new_on; 
+
+
+    end
+
+
+end
 
 
 end

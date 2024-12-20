@@ -1,9 +1,48 @@
-%% statitics for CPPG data
-
-%%
 function [reacting_cells_per_fish, reacting_rand_per_fish] = AO_compare_region_to_random(dff_fish, positions, brain_regions, drug_onsets, baseline_time)
+%AO_compare_region_to_random - This function calculated the affected cells
+%by CPPG in a specific regions and compares it to randomly drawn cells
+%   Author: Anna Maria Ostenrath
+%   
+%   Syntax:
+%       [reacting_cells_per_fish, reacting_rand_per_fish] = AO_compare_region_to_random(dff_fish, positions, brain_regions, drug_onsets, baseline_time)
+%       
+%
+%   Description:
+%       AO_compare_region_to_random() - Calculate affected cells in a
+%       region by a drug
+%    
+%   Inputs:
+%       dff_fish - cell array with the dFF (neuron x time) of all the fish
+%       positions - cell array with the 3D positions of each fish
+%       brain_regions - cell array with the brain region index for each
+%       fish
+%       drug_onsets - onsets of the drug if they are different for each
+%       fish
+%       baseline_time - time before the drug 
+%
+%   Outputs:
+%       reacting_cells_per_fish - percentage of affected cells foreach fish
+%       per region
+%       reacting_rand_per_fish - percentage of affected cells foreach fish
+%       but randomly pulled
+%
+%   Examples: 
+%       Line 1 of example
+%       Line 2 of example
+%       Line 3 of example
+%
+%   Other m-files required: none
+%   Subfunctions: none
+%   MAT-files required: none
+%
+%   See also: OTHER_FUNCTION_NAME1,  OTHER_FUNCTION_NAME2
+%   Author: Anna Maria Ostenrath 
+%   Date : September 2024
 
-uni_brain_regions = [1, 2, 3, 4, 5, 6, 7, 9, 11]; 
+
+
+
+uni_brain_regions = [1, 2, 3, 4, 5, 6, 7, 9, 11, 15]; 
 reacting_cells_per_fish = zeros(size(dff_fish,2), length(uni_brain_regions));
 reacting_rand_per_fish = zeros(size(dff_fish,2), length(uni_brain_regions));
 

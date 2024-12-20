@@ -4,22 +4,22 @@
 %% General Info
 
 % Data paths 
-cfg.data_path ='W:\Anna\mGluR LDS\mGluRBehav\'; %folder where data for experiment is found and saved
-cfg.stk_files   = dir(fullfile(cfg.data_path, '*Exp*')); 
+metadata.data_path ='W:\Anna\mGluR LDS\mGluRBehav\'; %folder where data for experiment is found and saved
+metadata.stk_files   = dir(fullfile(metadata.data_path, '*Exp*')); 
 
 % ENTER VARIABLEs FROM EXPERIMENTS
-cfg.NumberArena=6; %enter the numbers of arenas used in your aquisition
-cfg.numStimuli = 10; %number of stimuli used in protocol  
+metadata.NumberArena=6; %enter the numbers of arenas used in your aquisition
+metadata.numStimuli = 10; %number of stimuli used in protocol  
 
-cfg.GroupName=char('Wt','Het','Hom'); %add group names %BT:indicates days of treatment
+metadata.GroupName=char('Wt','Het','Hom'); %add group names %BT:indicates days of treatment
 group_names = {'Wt','Het','Hom'};
 % Table path
-table_path = dir(fullfile(cfg.data_path, '*.xlsx')); %define path of excel table with infos about experiments
+table_path = dir(fullfile(metadata.data_path, '*.xlsx')); %define path of excel table with infos about experiments
 T= readtable([table_path(1).folder filesep table_path(1).name]); %read table 
 disp('Table read.')
 
 clear table_path
-cfg.data_save=[cfg.data_path 'Analyzed' filesep];
+metadata.data_save=[metadata.data_path 'Analyzed' filesep];
 load("X:\anna\code\Repositories\Anna-Code-Collection\everyday functions\beachVibes.mat")
 
 %% Loading the data 
@@ -28,9 +28,9 @@ load("X:\anna\code\Repositories\Anna-Code-Collection\everyday functions\beachVib
 
 tic
 [all_fish]=[];
-for i=24:size(cfg.stk_files,1)
-data_path_temp=[cfg.stk_files(i).folder filesep cfg.stk_files(i).name filesep] %load data from subfolders
-[temp] = AO_loadCSVfileZantiks(data_path_temp, cfg, T); %restructure data to have all information from one fish in one cell
+for i=24:size(metadata.stk_files,1)
+data_path_temp=[metadata.stk_files(i).folder filesep metadata.stk_files(i).name filesep] %load data from subfolders
+[temp] = AO_loadCSVfileZantiks(data_path_temp, metadata, T); %restructure data to have all information from one fish in one cell
 [all_fish] = cat(1, all_fish, temp); %make variable with information of all fish together
 data_path_temp=[];
 temp=[];
@@ -39,17 +39,36 @@ toc
 
 clear data_path_temp temp
 
+%% Loading the data
+% Identify all folders where each single experiment is found (1 plate) and load simultaneously both XY and distance
+% data into one cell per fish
+wrongsheet = 1; % if you used the vibration codes before we fixed it 2.09.24 please make this 1! 
+restricted = 0; % this is only for the CPPGinj21dpf date
+tic
+[all_fish]=[];
+for i=1:size(metadata.stk_files,1)
+data_path_temp=[metadata.stk_files(i).folder filesep metadata.stk_files(i).name filesep] %load data from subfolders
+[temp] = AO_loadCSVfileZantiksUpdated(data_path_temp, metadata, T, wrongsheet, restricted, metadata.stk_files(i).name); %restructure data to have all information from one fish in one cell
+[all_fish] = cat(1, all_fish, temp); %make variable with information of all fish together
+data_path_temp=[];
+temp=[];
+end
+toc
+
+clear data_path_temp temp
+
+
 %% Save data, specify experiment
 %make a folder to save data
-mkdir([cfg.data_path 'Analyzed' filesep]); %make a new folder to save analyzed data
-cfg.data_save=[cfg.data_path 'Analyzed' filesep]; %put info into structure
-save([cfg.data_save 'all_fish_data.mat'] , 'all_fish', 'cfg', '-v7.3'); %save variable 'all_fish' and 'cfg' = metadata
+mkdir([metadata.data_path 'Analyzed' filesep]); %make a new folder to save analyzed data
+metadata.data_save=[metadata.data_path 'Analyzed' filesep]; %put info into structure
+save([metadata.data_save 'all_fish_data.mat'] , 'all_fish', 'metadata', '-v7.3'); %save variable 'all_fish' and 'cfg' = metadata
 
 
 
 %% Now I want to make my group variables 
-groups_LDS = cell(size(cfg.GroupName,1),1); % this is for the LDS
-groups_Vib = cell(size(cfg.GroupName,1),1); % this is for the startle resp
+groups_LDS = cell(size(metadata.GroupName,1),1); % this is for the LDS
+groups_Vib = cell(size(metadata.GroupName,1),1); % this is for the startle resp
 for fish = 1:size(all_fish,1)
     if all_fish{fish, 1}.group ~= 0
         if all_fish{fish,1}.stable == 1
@@ -62,7 +81,7 @@ for fish = 1:size(all_fish,1)
     end
 
 end
-no_group = size(cfg.GroupName,1);
+no_group = size(metadata.GroupName,1);
 
 %% create heatmap for all groups
 collect_dist_LDS = cell(no_group,1);
@@ -86,7 +105,7 @@ for i=1:no_group  %for all groups
         subplot(no_group,1,i), imagesc(collect_dist_LDS{i,1}') %select fish from certain group - encoded in T.Groupcounter
         colormap (flipud (hot))
         colorbar
-        title (cfg.GroupName(i,:)) %change according to group name
+        title (metadata.GroupName(i,:)) %change according to group name
         ylabel('Fish number')
         xlabel('time (s)')
         box ('off')
@@ -95,9 +114,9 @@ for i=1:no_group  %for all groups
         xline(all_fish{(groups_LDS{group}(1)), 1}.LDSstimuliOnset, '--r', 'LineWidth', 2) %vertical line for stimulus onset
         xline(all_fish{(groups_LDS{group}(1)), 1}.LDSstimuliOffset, '--k', 'LineWidth', 2) %vertical line for stimulus onset
 end
-sgtitle(num2str(cfg.data_path))
-saveas(gcf, fullfile(cfg.data_save, ['Heatmap_exp.png']))
-saveas(gcf, fullfile(cfg.data_save, ['Heatmap_exp.svg']))
+sgtitle(num2str(metadata.data_path))
+saveas(gcf, fullfile(metadata.data_save, ['Heatmap_exp.png']))
+saveas(gcf, fullfile(metadata.data_save, ['Heatmap_exp.svg']))
 % Plot curves for averaged activity with SEM
 
 % clear BinBinDistance temp
@@ -126,11 +145,11 @@ for i=1:no_group     %for all groups
    temp=[];
 end
 hold on;
-sgtitle(num2str(cfg.data_path))
-legend ("","","",cfg.GroupName(1,:),"","","","","","","","","","","","","","",cfg.GroupName(2,:),"","","","","","","","","","","","","","",cfg.GroupName(3,:),'Light ON',"","","","",'Light OFF',"","","","","")
+sgtitle(num2str(metadata.data_path))
+legend ("","","",metadata.GroupName(1,:),"","","","","","","","","","","","","","",metadata.GroupName(2,:),"","","","","","","","","","","","","","",metadata.GroupName(3,:),'Light ON',"","","","",'Light OFF',"","","","","")
 %legend ("","","",cfg.GroupName(1,:),'Light ON',"","","","",'Light OFF',"","","","","")    %for WT group only
-saveas(gcf, fullfile(cfg.data_save, ['Traces_exp.png']))
-saveas(gcf, fullfile(cfg.data_save, ['Traces_exp.svg']))
+saveas(gcf, fullfile(metadata.data_save, ['Traces_exp.png']))
+saveas(gcf, fullfile(metadata.data_save, ['Traces_exp.svg']))
 %% Plotting averages per group (Binned distance) (from_ME)
 
 num_intervals = length(time_intervals) - 1;
@@ -179,9 +198,9 @@ end
 p2 = xline(1.5:2:21.5, '--k');
 p3 = xline(2.5:2:20.5, '--r');
 all_plot = [all_plot, p2(1), p3(1)];
-legend(all_plot, {cfg.GroupName(1,:),cfg.GroupName(2,:), cfg.GroupName(3,:),'Light OFF','Light ON'})
-saveas(gcf, fullfile(cfg.data_save, ['Avg_binned_distance.png']))
-saveas(gcf, fullfile(cfg.data_save, ['Avg_binned_distance.svg']))
+legend(all_plot, {metadata.GroupName(1,:),metadata.GroupName(2,:), metadata.GroupName(3,:),'Light OFF','Light ON'})
+saveas(gcf, fullfile(metadata.data_save, ['Avg_binned_distance.png']))
+saveas(gcf, fullfile(metadata.data_save, ['Avg_binned_distance.svg']))
 
 
 %% Extract all stimuli per fish from all distance data and plot
@@ -248,7 +267,7 @@ for group=1:no_group
    %sgtitle(cfg.ISIname(plotISI,:)) %add overall title to subplots
     
     colorbar
-    title ([ name_add, ' ', cfg.GroupName(group,:)]) %title for each individual subplot
+    title ([ name_add, ' ', metadata.GroupName(group,:)]) %title for each individual subplot
     ylabel('Fish nr.')
     xlabel('time (s)')
     box ('off')
@@ -265,10 +284,10 @@ for group=1:no_group
     xline(300+baseline, '--k')
     xline(600+baseline, '--k')
     temp=[];
-    sgtitle(['average all stimuli for ' num2str(cfg.data_path)])
+    sgtitle(['average all stimuli for ' num2str(metadata.data_path)])
 end
-saveas(gcf, fullfile(cfg.data_save, [name_add, '_','Avg_heatmap.png']))
-saveas(gcf, fullfile(cfg.data_save, [name_add, '_','Avg_heatmap.svg']))
+saveas(gcf, fullfile(metadata.data_save, [name_add, '_','Avg_heatmap.png']))
+saveas(gcf, fullfile(metadata.data_save, [name_add, '_','Avg_heatmap.svg']))
 % plot curves for averaged stimuli with SEM
 
 time=[-baseline:600+baseline]; %define x-axis
@@ -287,15 +306,15 @@ for group=1:no_group
     xline(300, '--r')
    plpl = [plpl, H1.mainLine ]
    %title(cfg.ISIname(plotISI,:))
-   sgtitle(['average all stimuli for ' num2str(cfg.data_path) name_add])
+   sgtitle(['average all stimuli for ' num2str(metadata.data_path) name_add])
 %legend("","","",cfg.GroupName(1,:),"","","","","","","","","","","","","","",cfg.GroupName(2,:),"","","","","","","","","","","","","","",cfg.GroupName(3,:),"","","","","","","","","","","","","","",cfg.GroupName(4,:),'Light ON',"","","","",'Light OFF',"","","","","")
 end
-legend(plpl, cfg.GroupName);
+legend(plpl, metadata.GroupName);
 
 % legend ("","","",cfg.GroupName(1,:),"","","","","",cfg.GroupName(2,:),"","","","","",cfg.GroupName(3,:),'Light OFF','Light ON')
 
-saveas(gcf, fullfile(cfg.data_save, [name_add, '_','Avg_Traces_exp.png']))
-saveas(gcf, fullfile(cfg.data_save, [name_add, '_','Avg_Traces_exp.svg']))
+saveas(gcf, fullfile(metadata.data_save, [name_add, '_','Avg_Traces_exp.png']))
+saveas(gcf, fullfile(metadata.data_save, [name_add, '_','Avg_Traces_exp.svg']))
 x_spots = [[1.5 2 2.5]; [4.5 5 5.5]];
 avg_off = cell(3,1);
 avg_on = cell(3,1);
@@ -333,8 +352,8 @@ xticklabels({'Off trans', 'On trans'})
 xlim([0 7])
 legend(plplpl, group_names)
 ylabel(['Avg binned distance [mm] with timebin ', num2str(time_per) , ' s after stim ' name_add, ' ',])
-saveas(gcf, fullfile(cfg.data_save, [name_add, '_',num2str(time_per) '_Avg_transition_scatter.png']))
-saveas(gcf, fullfile(cfg.data_save, [name_add, '_',num2str(time_per) '_Avg_transition_scatter.svg']))
+saveas(gcf, fullfile(metadata.data_save, [name_add, '_',num2str(time_per) '_Avg_transition_scatter.png']))
+saveas(gcf, fullfile(metadata.data_save, [name_add, '_',num2str(time_per) '_Avg_transition_scatter.svg']))
 
 figure
 x = beeswarm(group_oder,combined_data)
@@ -343,9 +362,9 @@ hold on
 er = errorbar([x_spots(1,:)],grouop_avg, sems)
 er.Color = [0 0 0];                            
 er.LineStyle = 'none';
-saveas(gcf, fullfile(cfg.data_save, [name_add, '_',num2str(time_per) '_Avg_transition_scatterBEE.png']))
-saveas(gcf, fullfile(cfg.data_save, [name_add, '_',num2str(time_per) '_Avg_transition_scatterBEE.svg']))
-saveas(gcf, fullfile(cfg.data_save, [name_add, '_',num2str(time_per) '_Avg_transition_scatterBEE.fig']))
+saveas(gcf, fullfile(metadata.data_save, [name_add, '_',num2str(time_per) '_Avg_transition_scatterBEE.png']))
+saveas(gcf, fullfile(metadata.data_save, [name_add, '_',num2str(time_per) '_Avg_transition_scatterBEE.svg']))
+saveas(gcf, fullfile(metadata.data_save, [name_add, '_',num2str(time_per) '_Avg_transition_scatterBEE.fig']))
 
 [p_1, h_1] = quick_statistic(mean(avg_on{1,1},1), mean(avg_on{2,1},1))
 [p_2, h_2] = quick_statistic(mean(avg_on{1,1},1), mean(avg_on{3,1},1))

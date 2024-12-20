@@ -28,6 +28,8 @@ else
     load(fullfile(source, data_file(1).name))
 end
 
+save([folder_path_save 'all_fish_data.mat'] , 'all_fish', '-v7.3'); %save variable 'all_fish' and 'metadata' = metadata
+
 %% Additional variables 
 % now we want to make some additional variables to make the plotting and
 % everything easier later on

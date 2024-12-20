@@ -1,9 +1,9 @@
 %% Fig1 
 
 %load the dataset 
-load("X:\anna\Manuscript\FigData\Fig1\Collected_data_all_fish_fig1.mat"); % this is now the data of all the fish
+load("X:\anna\Manuscript\Data and matlab\FigData\Fig1\Collected_data_all_fish_fig1.mat"); % this is now the data of all the fish
 load("X:\anna\code\Repositories\Anna-Code-Collection\everyday functions\beachVibes.mat")
-save_path = 'X:\anna\Manuscript\FigData\Fig1'; %replace with your path
+save_path = 'X:\anna\Manuscript\Data and matlab\FigData\Fig1'; %replace with your path
 
 % to make the example figures I do Odor fish:4 Tap/Light Fish: 7
 % to collect the odor data 
