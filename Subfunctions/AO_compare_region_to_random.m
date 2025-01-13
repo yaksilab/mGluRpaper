@@ -1,51 +1,12 @@
-function [reacting_cells_per_fish, reacting_rand_per_fish] = AO_compare_region_to_random(dff_fish, positions, brain_regions, drug_onsets, baseline_time)
-%AO_compare_region_to_random - This function calculated the affected cells
-%by CPPG in a specific regions and compares it to randomly drawn cells
-%   Author: Anna Maria Ostenrath
-%   
-%   Syntax:
-%       [reacting_cells_per_fish, reacting_rand_per_fish] = AO_compare_region_to_random(dff_fish, positions, brain_regions, drug_onsets, baseline_time)
-%       
-%
-%   Description:
-%       AO_compare_region_to_random() - Calculate affected cells in a
-%       region by a drug
-%    
-%   Inputs:
-%       dff_fish - cell array with the dFF (neuron x time) of all the fish
-%       positions - cell array with the 3D positions of each fish
-%       brain_regions - cell array with the brain region index for each
-%       fish
-%       drug_onsets - onsets of the drug if they are different for each
-%       fish
-%       baseline_time - time before the drug 
-%
-%   Outputs:
-%       reacting_cells_per_fish - percentage of affected cells foreach fish
-%       per region
-%       reacting_rand_per_fish - percentage of affected cells foreach fish
-%       but randomly pulled
-%
-%   Examples: 
-%       Line 1 of example
-%       Line 2 of example
-%       Line 3 of example
-%
-%   Other m-files required: none
-%   Subfunctions: none
-%   MAT-files required: none
-%
-%   See also: OTHER_FUNCTION_NAME1,  OTHER_FUNCTION_NAME2
-%   Author: Anna Maria Ostenrath 
-%   Date : September 2024
+%% statitics for CPPG data
 
-
-
+%%
+function [reacting_cells_per_fish, reacting_rand_per_fish, hab_resp_list] = AO_compare_region_to_random(dff_fish, positions, brain_regions, drug_onsets, baseline_time)
 
 uni_brain_regions = [1, 2, 3, 4, 5, 6, 7, 9, 11, 15]; 
 reacting_cells_per_fish = zeros(size(dff_fish,2), length(uni_brain_regions));
 reacting_rand_per_fish = zeros(size(dff_fish,2), length(uni_brain_regions));
-
+hab_resp_list = cell(size(dff_fish,2),1); 
 for fish = 1:size(dff_fish,2)
    
     
@@ -68,13 +29,20 @@ for fish = 1:size(dff_fish,2)
     all_positive_ran_perc = [];
     all_negative_ran_perc = [];
     
-    results.redoneIndex = brain_regions{1,fish}; 
+    results.redoneIndex = brain_regions{1,fish};
+    % responding cell list but just for Hb
+    
     for cu_region=1:length(uni_brain_regions)
         region = uni_brain_regions(cu_region);
+
     % the region of the loop
         baseline = mean(dff_all_cells(find(results.redoneIndex==region),baseline_start:baseline_stop),2);
         std_baseline = std(dff_all_cells(find(results.redoneIndex==region),baseline_start:baseline_stop), 0 ,2);
         drug = mean(dff_all_cells(find(results.redoneIndex==region),drug_start:drug_stop),2);
+
+        if region == 11
+            cur_hb_list = zeros(length(drug),1);
+        end
     
     % here I am trying to see if the cell is increasing or decreasing in
     % activity 
@@ -90,16 +58,25 @@ for fish = 1:size(dff_fish,2)
     % %             continue
     %         end 
     %     end
-        for cell=1:length(drug)
-            if baseline(cell)+std_baseline(cell)*2 < drug(cell)
-                perc_cells_reacting_pos = [perc_cells_reacting_pos, cell];
-            elseif baseline(cell)-std_baseline(cell)*2 > drug(cell)
-                perc_cells_reacting_neg = [perc_cells_reacting_neg, cell]; 
+        for neuron=1:length(drug)
+            if baseline(neuron)+std_baseline(neuron)*2 < drug(neuron)
+                perc_cells_reacting_pos = [perc_cells_reacting_pos, neuron];
+                if region == 11
+                    cur_hb_list(neuron) = 1;
+                end
+            elseif baseline(neuron)-std_baseline(neuron)*2 > drug(neuron)
+                perc_cells_reacting_neg = [perc_cells_reacting_neg, neuron];
+                 if region == 11
+                    cur_hb_list(neuron) = -1;
+                end
     %         else
     %             continue
             end 
         end
-    
+        if region == 11
+                    hab_resp_list{fish,1} = cur_hb_list; 
+        end
+        
        % now I am calculating the percentage of cells that are reacting either
        % with increase (positive) or decrease (neg)
         cells_reacting_pos = length(perc_cells_reacting_pos);
@@ -126,11 +103,11 @@ for fish = 1:size(dff_fish,2)
             positive_reacts = [];
             negative_racts = [];
             %now I am looking which cells are po/neg repsonding 
-            for cell=1:length(rand_drug)
-                if rand_base(cell) + rand_base_std(cell)*2 < rand_drug(cell)
-                    positive_reacts = [positive_reacts, cell];
-                elseif rand_base(cell)-rand_base_std(cell)*2 > rand_drug(cell)
-                    negative_racts = [negative_racts, cell]; 
+            for neuron=1:length(rand_drug)
+                if rand_base(neuron) + rand_base_std(neuron)*2 < rand_drug(neuron)
+                    positive_reacts = [positive_reacts, neuron];
+                elseif rand_base(neuron)-rand_base_std(neuron)*2 > rand_drug(neuron)
+                    negative_racts = [negative_racts, neuron]; 
                 end 
             end
             %now I calculate the % for the rand cycle we are in

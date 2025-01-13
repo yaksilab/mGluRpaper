@@ -1,7 +1,7 @@
 %% Fig7EF
 
 % 
-%% General Info
+%% General Info mGluR mutant
 
 % Data paths 
 metadata.data_path ='W:\Anna\mGluR LDS\mGluRBehav\'; %folder where data for experiment is found and saved
@@ -19,9 +19,29 @@ T= readtable([table_path(1).folder filesep table_path(1).name]); %read table
 disp('Table read.')
 
 clear table_path
-metadata.data_save=[metadata.data_path 'Analyzed' filesep];
+metadata.data_save='X:\anna\Manuscript\Data and matlab\FigData\Fig7'; %[metadata.data_path 'Analyzed' filesep];
 load("X:\anna\code\Repositories\Anna-Code-Collection\everyday functions\beachVibes.mat")
 
+%% General Info CPPG inj
+
+% Data paths 
+metadata.data_path = 'W:\Anna\CPPGbehav21dpf\';
+metadata.stk_files   = dir(fullfile(metadata.data_path, '*Exp*')); 
+
+% ENTER VARIABLEs FROM EXPERIMENTS
+metadata.NumberArena= 6; %enter the numbers of arenas used in your aquisition
+metadata.numStimuli = 10; %number of stimuli used in protocol LDS 
+
+metadata.GroupName = char('NO', 'Con','CPPG'); %add group names %BT:indicates days of treatment
+group_names = {'NO', 'Con','CPPG'}; 
+% Table path
+table_path = dir(fullfile(metadata.data_path, '*.xlsx')); %define path of excel table with infos about experiments
+T = readtable([table_path(1).folder filesep table_path(1).name]); %("W:\Anna\CPPGbehav21dpf\CPPG_inj_21dpf.xlsx"); %read table [table_path(1).folder filesep table_path(1).name]
+disp('Table read.')
+
+clear table_path
+metadata.data_save='X:\anna\Manuscript\Data and matlab\FigData\Fig7\CPPG\'; %[metadata.data_path 'Analyzed' filesep];
+load("X:\anna\code\Repositories\Anna-Code-Collection\everyday functions\beachVibes.mat")
 %% Loading the data 
 % Identify all folders where each single experiment is found (1 plate) and load simultaneously both XY and distance
 % data into one cell per fish
@@ -213,7 +233,7 @@ saveas(gcf, fullfile(metadata.data_save, ['Avg_binned_distance.svg']))
 All_fish_stimuli=[];
 LDS_data_per_stim = cell(3,1); 
 LDS_data_per_stim_change = cell(3,1);
-baseline = 60; %how much before the stimulus
+baseline = 10; %how much before the stimulus
 use_change = 1;
 for group = 1:no_group
     for fish = 1:size(groups_LDS{group},2)
@@ -312,14 +332,18 @@ end
 legend(plpl, metadata.GroupName);
 
 % legend ("","","",cfg.GroupName(1,:),"","","","","",cfg.GroupName(2,:),"","","","","",cfg.GroupName(3,:),'Light OFF','Light ON')
-
-saveas(gcf, fullfile(metadata.data_save, [name_add, '_','Avg_Traces_exp.png']))
-saveas(gcf, fullfile(metadata.data_save, [name_add, '_','Avg_Traces_exp.svg']))
+xlim([-10 299])
+saveas(gcf, fullfile(metadata.data_save, [name_add, '_','Avg_Traces_expOFF.png']))
+saveas(gcf, fullfile(metadata.data_save, [name_add, '_','Avg_Traces_expOFF.svg']))
+% legend ("","","",cfg.GroupName(1,:),"","","","","",cfg.GroupName(2,:),"","","","","",cfg.GroupName(3,:),'Light OFF','Light ON')
+xlim([290 599])
+saveas(gcf, fullfile(metadata.data_save, [name_add, '_','Avg_Traces_expON.png']))
+saveas(gcf, fullfile(metadata.data_save, [name_add, '_','Avg_Traces_expON.svg']))
 x_spots = [[1.5 2 2.5]; [4.5 5 5.5]];
 avg_off = cell(3,1);
 avg_on = cell(3,1);
 
-time_per = 30;
+time_per = 300;
 figure('units','centimeters','Position',[2 2 10 10])
 hold on
 plplpl = [];
@@ -345,6 +369,11 @@ for group = 1:no_group
     combined_data = [combined_data; mean(off_data,1)'];
     grouop_avg = [grouop_avg; mean(mean(off_data,2),1)];
     sems = [sems; squeeze(nanstd(mean(off_data),0,2)/sqrt(size(off_data,2)))];
+
+%     group_oder = [group_oder; ones(size(on_data,2),1)*x_spots(1,group)]; %ones(size(off_data,2),1)*group
+%     combined_data = [combined_data; mean(on_data,1)'];
+%     grouop_avg = [grouop_avg; mean(mean(on_data,2),1)];
+%     sems = [sems; squeeze(nanstd(mean(on_data),0,2)/sqrt(size(on_data,2)))];
 end
 title([name_add,' with timebin ', num2str(time_per), ' s after stim '])
 xticks([2 5]);
@@ -362,10 +391,14 @@ hold on
 er = errorbar([x_spots(1,:)],grouop_avg, sems)
 er.Color = [0 0 0];                            
 er.LineStyle = 'none';
+set(gcf,'units','centimeters','Position',[2 2 10 10])
 saveas(gcf, fullfile(metadata.data_save, [name_add, '_',num2str(time_per) '_Avg_transition_scatterBEE.png']))
 saveas(gcf, fullfile(metadata.data_save, [name_add, '_',num2str(time_per) '_Avg_transition_scatterBEE.svg']))
 saveas(gcf, fullfile(metadata.data_save, [name_add, '_',num2str(time_per) '_Avg_transition_scatterBEE.fig']))
 
+% saveas(gcf, fullfile(metadata.data_save, [name_add, '_',num2str(time_per) '_Avg_transition_scatterBEEON.png']))
+% saveas(gcf, fullfile(metadata.data_save, [name_add, '_',num2str(time_per) '_Avg_transition_scatterBEEON.svg']))
+% saveas(gcf, fullfile(metadata.data_save, [name_add, '_',num2str(time_per) '_Avg_transition_scatterBEEON.fig']))
 [p_1, h_1] = quick_statistic(mean(avg_on{1,1},1), mean(avg_on{2,1},1))
 [p_2, h_2] = quick_statistic(mean(avg_on{1,1},1), mean(avg_on{3,1},1))
 [p_3, h_3] = quick_statistic(mean(avg_on{2,1},1), mean(avg_on{3,1},1))

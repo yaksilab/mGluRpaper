@@ -1,12 +1,12 @@
 function [avg_ampl, collected_ampl] = check_amplitudes(all_dffs_trial, brain_regions_wt, position_wt, ...
-    con_names, save_path,name, cmap, thresh_dormedneurons_wt, dorsomed, con_trials, stim_period)
+    con_names, save_path,name, cmap, thresh_dormedneurons_wt, dorsomed, con_trials, stim_period, brainnumber)
 
 % changed this to not be flexible for brain region anymore
 avg_ampl = nan([size(con_trials,1), size(all_dffs_trial,2),1]);
 collected_ampl = cell(size(con_trials,1),1); 
 for fish = 1:size(all_dffs_trial,2)
 
-    brainnumber = 11; 
+    % brainnumber = 11; 
     
     current_dff = all_dffs_trial{1,fish};
     % current_dff = all_dffs_wt{1,fish};

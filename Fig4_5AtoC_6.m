@@ -1,5 +1,5 @@
 %% Fig4 
-
+% group_names = ; 
 % Loading the data 
 load('X:\anna\Manuscript\Data and matlab\FigData\Fig4\Fig4_cppg_injection_data.mat')
 
@@ -9,6 +9,8 @@ positions = cppg_injection_data.positions;
 dff_trialwise = cppg_injection_data.dff_trialw; 
 fra_rat_two_pho = cppg_injection_data.frame_rate; 
 stim_times = cppg_injection_data.stim_times; 
+
+save_path = 'X:\anna\Manuscript\Data and matlab\FigData'; 
 
 %% Ploting colors
 cmap_wt = ['E4E6EB'; 'B0B3B8'; '18191A']; 
@@ -63,10 +65,10 @@ close all;
 % make bar plots for exc and inhib 
 % show some traces and heatmap 
 
-con_trials = results.conIdx; 
-con_names = results.conNames; 
+con_trials = [1 2 3 4 5 6 7 8 ; 9 10 11 12 13 14 15 16; 17 18 19 20 21 22 23 24]; %results.conIdx; 
+con_names = {'Light', 'Vib', 'LightVib'}; 
 std_factor = 2; 
-brainnumber = 11;
+brainnumber = 11; %15 for midbrian
 no_con = 3; 
 
 baseline_dur = floor(5 * fra_rat_two_pho); 
@@ -195,7 +197,7 @@ end
 % first I could just collect all of the dff values both for the heatmap and
 % for the scatter plot
 stim_per = 1; 
-brainnumber = 11; 
+brainnumber = 11; %15 for midbrian
 collected_dff = cell(no_group,no_con);
 selectivity_simple = cell(no_group, 1);
 for group = 1:no_group
@@ -299,6 +301,7 @@ for group = 1:no_group
 end
 
 %% Plotting 
+stim_period = diff_stim_period(1,:);
 end_Per = floor(30*fra_rat_two_pho); 
 % first the collected dffs for the two conditions per group
 for group = 1:no_group
@@ -481,8 +484,9 @@ saveas(fig2, fullfile(save_path, [group_names{1,3}, '_Selectivity_simple_CONDRU.
 % out just with like the mean? 
 dorsomed = 0; 
 resp_corr_val = cell(3,1);
+brainnumber = 11;
 for group = 1:no_group
-    [resp_corr_val{group,1}] = response_vector_correl(dff_trialwise{group,1}, brain_regions{group,1}, positions{group,1}, stim_period, con_trials, resp_period_list{group,1}, dorsomed, thresh_neu{group,1});
+    [resp_corr_val{group,1}] = response_vector_correl(dff_trialwise{group,1}, brain_regions{group,1}, positions{group,1}, stim_period, con_trials, resp_period_list{group,1}, dorsomed, thresh_neu{group,1}, brainnumber);
 
 end
 
@@ -538,11 +542,11 @@ saveas(fig2, fullfile(save_path, [group_names{1,3}, '_RespCorr_CONDRU.png']))
 dorsomed = 0;
 avg_ampl = cell(3,1); 
 collected_ampl = cell(3,1);
-
+brainnumber = 11; 
 for group = 1:no_group
 
     [avg_ampl{group,1}, collected_ampl{group,1}] = check_amplitudes(dff_trialwise{group,1}, brain_regions{group,1}, positions{group,1}, ...
-        con_names, save_path,group_names{group}, all_cmap{1,group}, thresh_neu{group,1}, dorsomed, con_trials, diff_stim_period(1,:));
+        con_names, save_path,group_names{group}, all_cmap{1,group}, thresh_neu{group,1}, dorsomed, con_trials, diff_stim_period(1,:), brainnumber);
 
 end
 

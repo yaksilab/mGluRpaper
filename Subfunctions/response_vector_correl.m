@@ -1,11 +1,11 @@
-function [resp_corr_val] = response_vector_correl(all_dfftrialw_wt_FL, brain_regions_wt, position_wt, stim_period, con_trials, resp_list_wt_dff_std, dorsomed, thresh_dormedneurons_wt)
+function [resp_corr_val] = response_vector_correl(all_dfftrialw_wt_FL, brain_regions_wt, position_wt, stim_period, con_trials, resp_list_wt_dff_std, dorsomed, thresh_dormedneurons_wt, brainnumber)
 
 
 resp_corr_val = nan(size(all_dfftrialw_wt_FL,2),3); 
 no_con = size(con_trials,1); 
 for fish = 1:size(all_dfftrialw_wt_FL,2)
 
-    brainnumber = 11; 
+    % brainnumber = 11; 
     current_dff = all_dfftrialw_wt_FL{1,fish};
     % current_dff = all_dffs_wt{1,fish};
     current_hab = current_dff(:,:,find(brain_regions_wt{1,fish} == brainnumber)); 
