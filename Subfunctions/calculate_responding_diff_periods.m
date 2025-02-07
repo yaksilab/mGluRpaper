@@ -46,11 +46,11 @@ for fish = 1:size(all_dfftrialw_wt_FL,2)
     
     % cutting the cells down to the brain regions
     current_dff = all_dfftrialw_wt_FL{1,fish};
-    if brainnumber == 0
-        current_hab = current_dff
-    else
+    % if brainnumber == 0
+    %     current_hab = current_dff;
+    % else
         current_hab = current_dff(:,:,find(brain_regions_wt{1,fish} == brainnumber)); 
-    end
+    % end
 
     % making the empty arrays to fill with responses
 

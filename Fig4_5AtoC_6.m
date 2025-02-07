@@ -12,6 +12,9 @@ stim_times = cppg_injection_data.stim_times;
 
 save_path = 'X:\anna\Manuscript\Data and matlab\FigData'; 
 
+no_group = size(dff_fist,1); 
+group_names = {'NoINj', 'Con', 'CPPG'}
+
 %% Ploting colors
 cmap_wt = ['E4E6EB'; 'B0B3B8'; '18191A']; 
 cmap_het = ['00FFFF'; '40E0D0'; '008080'];
@@ -53,12 +56,17 @@ thresh_neu = cell(no_group, 1);
 norm_lat_med = cell(no_group, 1); 
 norm_dor_ven = cell(no_group, 1); 
 ven_neu  = cell(no_group, 1); 
+dv_list = cell(no_group, 1);
 for group = 1: no_group
-    [dorsomed_ind{group, 1}, thresh_neu{group, 1}, norm_lat_med{group, 1}, norm_dor_ven{group, 1}, ven_neu{group, 1}] = calculate_dynamic_dorsomed_neurons(positions{group,1}, brain_regions{group,1}, percentage_inclu, all_planes_y, group_names{1,group}, save_path);
+    [dorsomed_ind{group, 1}, thresh_neu{group, 1}, norm_lat_med{group, 1}, norm_dor_ven{group, 1}, ven_neu{group, 1}, dv_list{group,1}] = calculate_dynamic_dorsomed_neurons(positions{group,1}, brain_regions{group,1}, percentage_inclu, all_planes_y, group_names{1,group}, save_path);
     
 
 end
 close all;
+
+% temp changing the brain regions to the new list
+% temp_brainregion = brain_regions; 
+% brain_regions = dv_list;
 %% Responding cells
 
 % Calculate the responding cells for the different conditions
@@ -187,9 +195,9 @@ for stim = 1:size(diff_stim_period,1)
          end
     end
 end
-% p_val_10s.p_val_pos = p_val_pos_period
-% p_val_10s.p_val_neg = p_val_neg_period
-% save(fullfile(save_path, 'pval_resp_10s.mat'), 'p_val_10s')
+p_val_10s.p_val_pos = p_val_pos_period
+p_val_10s.p_val_neg = p_val_neg_period
+save(fullfile(save_path, 'pval_resp_10s.mat'), 'p_val_10s')
 
 %% Uni vs. Mulitmodal cells (Selectivity)
 

@@ -1,0 +1,115 @@
+%% process_cppg_acsf_percent_response_data
+
+% set paths
+addpath(genpath('E:\mGluR Paper NF\code'))
+baseDataDir = 'E:\data\Kavli\experiments\';
+outputDir = 'E:\mGluR Paper NF\experiments\ACSF+CPPG imaging';
+
+% options 
+pix2micron = 100 / 154;
+preBuff = 20;
+postBuff = 80;
+time2plot = (-preBuff:postBuff-1) / 10;
+plotFigures = false; % Set to true to enable plotting
+
+%% load_cppg_acsf_percent_response_data
+function data = load_cppg_acsf_percent_response_data(experimentName, baseDataDir)
+dataFileName = 'recordings_stim.mat';
+load(fullfile(baseDataDir, experimentName, dataFileName));
+data = struct;
+
+for iCell = 1:size(recordings_stim, 2)
+    cellName = erase(recordings_stim(iCell).recordName, 'Stim');
+    cellDataPath = fullfile(baseDataDir, experimentName, 'cells', cellName, 'expDataStim.mat');
+    load(cellDataPath);
+
+    dataTmp = permute(reshape(expData.calciumSigs, size(expData.calciumSigs,1), [], length(recordings_stim(iCell).sweeps)), [2,1,3]);
+    data(iCell).patchTrace = squeeze(dataTmp(:,1,:));
+    data(iCell).allTrace = dataTmp(:,1:end,:);
+    data(iCell).calTimeS = expData.imagingData.times;
+
+    pulseBuffer = (length(expData.imagingData(1).times) - size(dataTmp,1)) / 2;
+    data(iCell).calStims = expData.imagingData(1).stims - pulseBuffer;
+
+    data(iCell).volt = expData.ephysData(end).voltage;
+    data(iCell).voltTimeS = expData.ephysData.times;
+    data(iCell).voltStims = expData.ephysData.stims;
+    data(iCell).dist = expData.cellDist;
+
+    clear expData;
+end
+end 
+
+%% process_experiment_data
+function output = process_experiment_data(data, pix2micron, preBuff, postBuff, time2plot, plotFigures)
+    stimIdx = data(1).calStims;
+    exciteId = cell(size(data,2),1);
+    inhibId = cell(size(data,2),1);
+    perE = []; perI = [];
+    distE = []; distI = []; distN = [];
+    
+    for iT = 1:size(data,2)
+        allResp = []; allE = []; allI = [];
+        exciteIdCell = zeros(size(data(iT).allTrace,2),1);
+        inhibIdCell = zeros(size(data(iT).allTrace,2),1);
+        
+        for iCell = 1:size(data(iT).allTrace,2)
+            c = squeeze(data(iT).allTrace(:, iCell, :));
+            c2 = []; pre = []; post = [];
+            
+            for iSweep = 1:size(c,2)
+                for iStim = 1:length(stimIdx)
+                    tmp = smoothdata(c(stimIdx(iStim)-preBuff:stimIdx(iStim)+postBuff-1, iSweep), 'gaussian', 10);
+                    tmp = (tmp - mean(tmp(1:preBuff))) ./ std(tmp(1:preBuff));
+                    c2 = cat(2, c2, tmp);
+                    pre = cat(1, pre, median(tmp(1:preBuff)));
+                    post = cat(1, post, median(tmp(preBuff+1:preBuff*2)));
+                end
+            end
+            
+            cm = mean(c2,2);
+            [p, h] = signrank(pre, post);
+            d = data(iT).dist(iCell) * pix2micron;
+            
+            if h
+                allResp = cat(2, allResp, cm);
+                if median(cm(1:preBuff)) < median(cm(preBuff+1:preBuff*2))
+                    allE = cat(2, allE, cm);
+                    exciteIdCell(iCell) = 1;
+                    distE = cat(1, distE, d);
+                else
+                    allI = cat(2, allI, cm);
+                    inhibIdCell(iCell) = 1;
+                    distI = cat(1, distI, d);
+                end
+            else
+                distN = cat(1, distN, d);
+            end
+        end
+        
+        exciteId{iT} = exciteIdCell;
+        inhibId{iT} = inhibIdCell;
+        perE = cat(1, perE, 100 * (size(allE,2) / (iCell-1)));
+        perI = cat(1, perI, 100 * (size(allI,2) / (iCell-1)));
+        
+        if plotFigures
+            figure; hold on;
+            if ~isempty(allI)
+                plot(time2plot, allI, '-', 'color', 'm', 'linew', 1.25);
+            end
+            if ~isempty(allE)
+                plot(time2plot, allE, '-', 'color', 'c', 'linew', 1.25);
+            end
+            xlabel('Time (s)'); ylabel('\DeltaF/F (z-score)');
+            set(gca, 'fontsize', 12); axis tight;
+            set(gcf, 'color', 'w');
+        end
+    end
+    output.exciteId = exciteId;
+    output.inhibId = inhibId;
+    output.perE = perE;
+    output.perI = perI;
+    output.distE = distE;
+    output.distI = distI;
+    output.distN = distN;
+end
