@@ -99,10 +99,10 @@ for fish = 1:size(position_wt,2)
     dv_list_fish = zeros(size(norm_dorven,1),1);
     for neuron = 1:size(norm_dorven,1)
         if norm_dorven(neuron) < thresh_dv
-            dv_list_fish(neuron) = 1;
+            dv_list_fish(neuron) = 1; % dorsal
 
         else
-            dv_list_fish(neuron) = 2;
+            dv_list_fish(neuron) = 2; %ventral
         end
 
     end

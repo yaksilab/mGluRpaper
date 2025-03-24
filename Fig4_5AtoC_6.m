@@ -15,6 +15,17 @@ save_path = 'X:\anna\Manuscript\Data and matlab\FigData';
 no_group = size(dff_fist,1); 
 group_names = {'NoINj', 'Con', 'CPPG'}
 
+%% for mglurs mutants
+dff_fist = combined_mGluR_multimodal.dff_fish;
+brain_regions = combined_mGluR_multimodal.brain_regions; 
+positions = combined_mGluR_multimodal.positions;
+dff_trialwise = combined_mGluR_multimodal.dff_trialw; 
+fra_rat_two_pho = combined_mGluR_multimodal.frame_rate; 
+stim_times = combined_mGluR_multimodal.stim_times; 
+
+no_group = size(dff_fist,1); 
+group_names = {'Wt', 'Het', 'Hom'}
+
 %% Ploting colors
 cmap_wt = ['E4E6EB'; 'B0B3B8'; '18191A']; 
 cmap_het = ['00FFFF'; '40E0D0'; '008080'];
@@ -122,19 +133,22 @@ for stim = 1:size(diff_stim_period,1)
     for fish = 1:size(brain_regions{1,1},2)
 
         region_list_bef{fish} = resp_period_list{1,1}{stim,1}{1,fish};
+        % region_list_bef{fish} = resp_period_list{1,1}{fish,1};
 
     end
 
     region_list_con = {}; 
     for fish = 1:size(brain_regions{2,1},2)
-     region_list_con{fish} = resp_period_list{2,1}{stim,1}{1,fish};;
+     region_list_con{fish} = resp_period_list{2,1}{stim,1}{1,fish};
+     % region_list_con{fish} = resp_period_list{2,1}{fish,1};;
 
     end
 
 
     region_list_dru = {}; 
     for fish = 1:size(brain_regions{3,1},2)
-        region_list_dru{fish} = resp_period_list{3,1}{stim,1}{1,fish};;
+        region_list_dru{fish} = resp_period_list{3,1}{stim,1}{1,fish};
+         % region_list_dru{fish} = resp_period_list{3,1}{fish,1};;
 
     end
     
@@ -483,6 +497,15 @@ saveas(fig1, fullfile(save_path, [group_names{1,3}, '_Selectivity_simple_CON.png
 saveas(fig2, fullfile(save_path, [group_names{1,3}, '_Selectivity_simple_CONDRU.svg']))
 saveas(fig2, fullfile(save_path, [group_names{1,3}, '_Selectivity_simple_CONDRU.png']))
 
+
+% plot stacked
+[fig1, fig2] = plotstackedbar([combined_sel{1,1}(:,1), combined_sel{1,1}(:,2), combined_sel{1,1}(:,2)], [combined_sel{2,1}(:,1), combined_sel{2,1}(:,2), combined_sel{2,1}(:,2)],[combined_sel{3,1}(:,1), combined_sel{3,1}(:,2), combined_sel{3,1}(:,2)], map_bef, map_con, map_dru, {'Unimodal', 'Multimodal', 'Neg again'}, group_names, {'Selectivity'}, 8 , 5)
+
+saveas(fig1, fullfile(save_path, [group_names{1,3}, '_Selectivity_simple_CONSTACKED.svg']))
+saveas(fig1, fullfile(save_path, [group_names{1,3}, '_Selectivity_simple_CONSTACKED.png']))
+saveas(fig2, fullfile(save_path, [group_names{1,3}, '_Selectivity_simple_CONDRUSTACKED.svg']))
+saveas(fig2, fullfile(save_path, [group_names{1,3}, '_Selectivity_simple_CONDRUSTACKED.png']))
+
 %% Trial Trial variability? response vector correlations? similarity? 
 % for group = 1:no_group
 %     [all_cond_saving] = trial_trial_var_groups(dff_trialwise{group,1}, brain_regions{group,1}, fra_rat_two_pho, con_trials, con_names, save_path, group_names{group}, 'Hb', 11)
@@ -490,11 +513,12 @@ saveas(fig2, fullfile(save_path, [group_names{1,3}, '_Selectivity_simple_CONDRU.
 
 % maybe i make a vector over the five sec initial response window? start
 % out just with like the mean? 
-dorsomed = 0; 
+dorsomed = 1; 
 resp_corr_val = cell(3,1);
+similarity_val = cell(3,1);
 brainnumber = 11;
 for group = 1:no_group
-    [resp_corr_val{group,1}] = response_vector_correl(dff_trialwise{group,1}, brain_regions{group,1}, positions{group,1}, stim_period, con_trials, resp_period_list{group,1}, dorsomed, thresh_neu{group,1}, brainnumber);
+    [resp_corr_val{group,1}, similarity_val{group,1}] = response_vector_correl(dff_trialwise{group,1}, brain_regions{group,1}, positions{group,1}, stim_period, con_trials, resp_period_list{group,1}, dorsomed, thresh_neu{group,1}, brainnumber);
 
 end
 
@@ -545,6 +569,53 @@ saveas(fig1, fullfile(save_path, [group_names{1,3}, '_RespCorr_CON.svg']))
 saveas(fig1, fullfile(save_path, [group_names{1,3}, '_RespCorr_CON.png']))
 saveas(fig2, fullfile(save_path, [group_names{1,3}, '_RespCorr_CONDRU.svg']))
 saveas(fig2, fullfile(save_path, [group_names{1,3}, '_RespCorr_CONDRU.png']))
+
+figure('units','centimeters','Position',[2 2 10 5])
+plot_bar_three_cond(similarity_val{1,1}, similarity_val{2,1},similarity_val{3,1}, map_bef, map_con, map_dru, {'L vs T', 'L vs LT', 'T vs LT'}, group_names)
+title('similarity dff' )
+ylabel('cosine sim')
+xlim([0.5 1.6])
+legend('Location', 'Eastoutside')
+if dorsomed
+    saveas(gcf, fullfile(save_path, ['Groups_respvec_cosinesim_dorsomed.svg']))
+    saveas(gcf, fullfile(save_path, ['Groups_respvec_cosinesim_dorsomed.png']))
+else
+    saveas(gcf, fullfile(save_path, ['Groups_respvec_cosinesim_dff.svg']))
+    saveas(gcf, fullfile(save_path, ['Groups_respvec_cosinesim_dff.png']))
+end
+
+
+p_val_cossim= {}; 
+
+% ylabel('% Perc of late inhibited cells')
+for con = 1:3
+     [p1, h] = quick_statistic(similarity_val{1,1}(:,con), similarity_val{2,1}(:,con))
+     [p2, h] = quick_statistic(similarity_val{1,1}(:,con), similarity_val{3,1}(:,con))
+     [p3, h] = quick_statistic(similarity_val{2,1}(:,con), similarity_val{3,1}(:,con))
+    p_val_cossim{con} = [p1; p2; p3];
+
+end
+if dorsomed
+
+   p_val_cosimi.dorsoemd = p_val_cossim; 
+else
+    p_val_cosimi.all = p_val_cossim; 
+end
+save(fullfile(save_path, 'p_val_similarity.mat'), 'p_val_cosimi')
+
+[fig1, fig2] = split_plot_bar_three_cond([similarity_val{1,1}(:,1), similarity_val{1,1}(:,2), similarity_val{1,1}(:,2)], [similarity_val{2,1}(:,1), similarity_val{2,1}(:,2), similarity_val{2,1}(:,2)],[similarity_val{3,1}(:,1), similarity_val{3,1}(:,2), similarity_val{3,1}(:,2)], map_bef, map_con, map_dru, {'L vs T', 'LvsLT', 'T vs LT'}, group_names, {'cos sim'}, 6, 5)
+figure(fig1)
+xlim([0.5 1.6])
+% xlim([0.5 2.6])
+ylabel('Corr Values')
+figure(fig2)
+xlim([0.5 1.6])
+% xlim([0.5 2.6])
+ylabel('Corr Values')
+saveas(fig1, fullfile(save_path, [group_names{1,3}, '_Respcosinesim_CON.svg']))
+saveas(fig1, fullfile(save_path, [group_names{1,3}, '_Respcosinesim_CON.png']))
+saveas(fig2, fullfile(save_path, [group_names{1,3}, '_Respcosinesim_CONDRU.svg']))
+saveas(fig2, fullfile(save_path, [group_names{1,3}, '_Respcosinesim_CONDRU.png']))
 
 %% Amplitudes 
 dorsomed = 0;

@@ -97,8 +97,8 @@ for cell = 1:size(trialwise_zscore,3) % now we loop over each cells
         % so here we now use signrank between base_period and stim_period to
         % find pos and neg resp cells
         for con = 1:no_con % loop over each condition
-            pre_con1 = mean(trialwise_zscore(base_period,con_trials(con, :),cell),1); 
-            post_con1 = mean(trialwise_zscore(stim_period,con_trials(con, :),cell),1); 
+            pre_con1 = nanmean(trialwise_zscore(base_period,con_trials(con, :),cell),1); 
+            post_con1 = nanmean(trialwise_zscore(stim_period,con_trials(con, :),cell),1); 
             % left tailed for positive and right tailed for neg responding 
             [p_con1_pos,h_con1_pos,stats_con1_pos] = signrank(pre_con1,post_con1,'tail','left','alpha',alpha);
             [p_con1_neg,h_con1_neg,stats_con1_neg] = signrank(pre_con1,post_con1,'tail','right','alpha',alpha);
