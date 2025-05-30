@@ -12,7 +12,8 @@ Each Figure has it's own matlab script and the implemented functions are collect
 ## General instructions
 -	Each figure has its own code script with instruction on how to run the code for each figure/experiment.
 -	The data path (plus other required paths) needs to be replaced for your system and then the code can be run either as a whole or per section. Each code has more information in the actual script file.
--	Due to the size of the data, no demo data is included. To get access to the data please check the publication. 
+-	Due to the size of the data, no demo data is included. To get access to the data please check the publication.
+-	Details are provided in the method section of the manuscript. 
 ## Specific Instructions: 
 ### Fig 1:
   - This script will generate the Figure 1 and Suppl. Figure 1. 
