@@ -15,7 +15,7 @@ save_path = 'X:\anna\Manuscript\Data and matlab\FigData';
 no_group = size(dff_fist,1); 
 group_names = {'NoINj', 'Con', 'CPPG'}
 
-%% for mglurs mutants
+%% for mglurs mutant
 dff_fist = combined_mGluR_multimodal.dff_fish;
 brain_regions = combined_mGluR_multimodal.brain_regions; 
 positions = combined_mGluR_multimodal.positions;
@@ -187,18 +187,18 @@ for stim = 1:size(diff_stim_period,1)
             plot_bar_three_cond([pos_perc_resp_wt(:,con), neg_perc_resp_wt(:,con), neg_perc_resp_wt(:,con)], [pos_perc_resp_het(:,con), neg_perc_resp_het(:,con), neg_perc_resp_het(:,con)],[pos_perc_resp_hom(:,con), neg_perc_resp_hom(:,con), neg_perc_resp_hom(:,con)], map_bef, map_con, map_dru, {'Exc', 'Inh', 'Neg again'}, group_names)
             title(con_names{con})
             legend('Location', 'eastoutside')
-            ylim([0 65])
+            ylim([0 85])
             xlim([0.5 2.6])
             saveas(gcf, fullfile(save_path, [stim_period_name{stim}, '_', con_names{con},'_Perc_respondingHb.svg']))
             saveas(gcf, fullfile(save_path, [stim_period_name{stim}, '_', con_names{con},'_Perc_respondingHb.png']))
 
             [fig1, fig2] = split_plot_bar_three_cond([pos_perc_resp_wt(:,con), neg_perc_resp_wt(:,con), neg_perc_resp_wt(:,con)], [pos_perc_resp_het(:,con), neg_perc_resp_het(:,con), neg_perc_resp_het(:,con)],[pos_perc_resp_hom(:,con), neg_perc_resp_hom(:,con), neg_perc_resp_hom(:,con)], map_bef, map_con, map_dru, {'Exc', 'Inh', 'Neg again'}, group_names, con_names{con}, 8, 5)
             figure(fig1)
-            ylim([0 65])
+            ylim([0 85])
             xlim([0.5 2.6])
 
             figure(fig2)
-            ylim([0 65])
+            ylim([0 85])
             xlim([0.5 2.6])
 
             saveas(fig1, fullfile(save_path, [stim_period_name{stim}, '_', con_names{con},'_Perc_respondingHbCONCOM.svg']))
@@ -513,10 +513,10 @@ saveas(fig2, fullfile(save_path, [group_names{1,3}, '_Selectivity_simple_CONDRUS
 
 % maybe i make a vector over the five sec initial response window? start
 % out just with like the mean? 
-dorsomed = 1; 
+dorsomed = 0; 
 resp_corr_val = cell(3,1);
 similarity_val = cell(3,1);
-brainnumber = 11;
+brainnumber = 2;
 for group = 1:no_group
     [resp_corr_val{group,1}, similarity_val{group,1}] = response_vector_correl(dff_trialwise{group,1}, brain_regions{group,1}, positions{group,1}, stim_period, con_trials, resp_period_list{group,1}, dorsomed, thresh_neu{group,1}, brainnumber);
 
@@ -585,7 +585,7 @@ else
 end
 
 
-p_val_cossim= {}; 
+p_val_cossim = {}; 
 
 % ylabel('% Perc of late inhibited cells')
 for con = 1:3

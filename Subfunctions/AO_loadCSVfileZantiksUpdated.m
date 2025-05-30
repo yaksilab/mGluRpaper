@@ -188,6 +188,8 @@ for no_fish=1:cfg.NumberArena
     data{no_fish,1}.stable = T.TrackingStable_unstable(table_idx(no_fish)); 
     data{no_fish,1}.fishNo = T.Fish(table_idx(no_fish)); 
     data{no_fish,1}.stableVib = T.Stable_V(table_idx(no_fish)); 
+    zansy = cell2mat(T.ZantiksTank(table_idx(no_fish))); 
+    data{no_fish,1}.ZanSys = str2double(zansy(2:end)); 
 end
 if restricted
     if cur_exp_no == 1 || cur_exp_no == 2
@@ -263,88 +265,89 @@ for no_fish=1:cfg.NumberArena
     data{no_fish,1}.VibstimuliOnset=all_vibr;
     data{no_fish,1}.VibrConNames=vibr_conNames;
     data{no_fish,1}.VibrConTrials=vibr_conTrials;
+
    
 end
 
-%% Velo
-% Rebin the distance 
-velBin = 0.5; 
-% len_velo_trace = length(fish_speed(new_time>floor(stim_times(1))-duration & new_time<floor(stim_times(1))+duration));  % double check why you floor it
-
-for no_fish=1:length(data) %parfor
-    % Load variables
-    t           = data{no_fish,1}.time;
-    dt          = diff(data{no_fish, 1}.time); %diff(all_fish{fish, 1}.time);
-%     s           = all_fish{fish,1}.binDistance;
-    n_bins      = floor(max(data{no_fish,1}.time)/velBin);
-    
-    % calculate the distance 
-    s = sqrt(diff(data{no_fish, 1}.x).^2 + diff(data{no_fish, 1}.y).^2);
-    % Calculate speed over time and delta-time
-    V1 = nan(1,length(dt));
-    for j=1:length(dt)-1
-        V1(j)= (s(j+1))/dt(j);
-    end
-    
-    %Calculate velocity per second
-    start_tim = t(1);
-    bV_temp=nan(1,n_bins);
-%     disp(ROI)
-    new_time = [];
-    for i=1:n_bins
-%         disp(i)
-        new_time = [new_time; start_tim + (i-1)*velBin];
-        try
-            bV_temp(i)= sum(s(t>(i-1)*velBin & t<=i*velBin))/...
-                        sum(dt(t>(i-1)*velBin & t<=i*velBin));
-        catch
-            disp('Here is weird thing with dt and length of t')
-            disp(no_fish)
-            disp(i)
-            bV_temp(i) = nan; 
-        end
-    end
-    % Save data inn cell array
-    data{no_fish,1}.speed_over_time                   =   V1;
-    if velBin < 1
-        velo_string = num2str(velBin); 
-        velo_string(2) = '_';
-        data{no_fish,1}.(['binnedVel_' velo_string])  =   bV_temp;
-        data{no_fish,1}.(['speed_over_time_' velo_string])  =   V1;
-        data{no_fish,1}.(['new_time_' velo_string])  =   new_time;
-    else
-        data{no_fish,1}.(['binnedVel_' num2str(velBin)])  =   bV_temp;
-        data{no_fish,1}.(['speed_over_time_' num2str(velBin)]) =   V1;
-        data{no_fish,1}.(['new_time_'  num2str(velBin)])  =   new_time;
-    end
-
-    % and then i could also already do the new stimulus onsets...
-    for trial = 1:length(data{no_fish,1}.LDSstimuliOnset)
-        new_on = find(new_time < data{no_fish,1}.binTime(data{no_fish,1}.LDSstimuliOnset(trial)));
-        new_on = new_on(end); 
-        data{no_fish,1}.LDS_stimOnset_bin(trial,1) = new_on; 
-
-
-    end
-
-    for trial = 1:length(data{no_fish,1}.LDSstimuliOffset)
-        new_on = find(new_time < data{no_fish,1}.binTime(data{no_fish,1}.LDSstimuliOffset(trial)));
-        new_on = new_on(end); 
-        data{no_fish,1}.LDS_stimOffset_bin(trial,1) = new_on; 
-
-
-    end
-
-     for trial = 1:length(data{no_fish,1}.VibstimuliOnset)
-        new_on = find(new_time < data{no_fish,1}.binTime(data{no_fish,1}.VibstimuliOnset(trial)));
-        new_on = new_on(end); 
-        data{no_fish,1}.Vib_stimOn_bin(trial,1) = new_on; 
-
-
-    end
-
-
-end
+% %% Velo
+% % Rebin the distance 
+% velBin = 0.5; 
+% % len_velo_trace = length(fish_speed(new_time>floor(stim_times(1))-duration & new_time<floor(stim_times(1))+duration));  % double check why you floor it
+% 
+% for no_fish=1:length(data) %parfor
+%     % Load variables
+%     t           = data{no_fish,1}.time;
+%     dt          = diff(data{no_fish, 1}.time); %diff(all_fish{fish, 1}.time);
+% %     s           = all_fish{fish,1}.binDistance;
+%     n_bins      = floor(max(data{no_fish,1}.time)/velBin);
+% 
+%     % calculate the distance 
+%     s = sqrt(diff(data{no_fish, 1}.x).^2 + diff(data{no_fish, 1}.y).^2);
+%     % Calculate speed over time and delta-time
+%     V1 = nan(1,length(dt));
+%     for j=1:length(dt)-1
+%         V1(j)= (s(j+1))/dt(j);
+%     end
+% 
+%     %Calculate velocity per second
+%     start_tim = t(1);
+%     bV_temp=nan(1,n_bins);
+% %     disp(ROI)
+%     new_time = [];
+%     for i=1:n_bins
+% %         disp(i)
+%         new_time = [new_time; start_tim + (i-1)*velBin];
+%         try
+%             bV_temp(i)= sum(s(t>(i-1)*velBin & t<=i*velBin))/...
+%                         sum(dt(t>(i-1)*velBin & t<=i*velBin));
+%         catch
+%             disp('Here is weird thing with dt and length of t')
+%             disp(no_fish)
+%             disp(i)
+%             bV_temp(i) = nan; 
+%         end
+%     end
+%     % Save data inn cell array
+%     data{no_fish,1}.speed_over_time                   =   V1;
+%     if velBin < 1
+%         velo_string = num2str(velBin); 
+%         velo_string(2) = '_';
+%         data{no_fish,1}.(['binnedVel_' velo_string])  =   bV_temp;
+%         data{no_fish,1}.(['speed_over_time_' velo_string])  =   V1;
+%         data{no_fish,1}.(['new_time_' velo_string])  =   new_time;
+%     else
+%         data{no_fish,1}.(['binnedVel_' num2str(velBin)])  =   bV_temp;
+%         data{no_fish,1}.(['speed_over_time_' num2str(velBin)]) =   V1;
+%         data{no_fish,1}.(['new_time_'  num2str(velBin)])  =   new_time;
+%     end
+% 
+%     % and then i could also already do the new stimulus onsets...
+%     for trial = 1:length(data{no_fish,1}.LDSstimuliOnset)
+%         new_on = find(new_time < data{no_fish,1}.binTime(data{no_fish,1}.LDSstimuliOnset(trial)));
+%         new_on = new_on(end); 
+%         data{no_fish,1}.LDS_stimOnset_bin(trial,1) = new_on; 
+% 
+% 
+%     end
+% 
+%     for trial = 1:length(data{no_fish,1}.LDSstimuliOffset)
+%         new_on = find(new_time < data{no_fish,1}.binTime(data{no_fish,1}.LDSstimuliOffset(trial)));
+%         new_on = new_on(end); 
+%         data{no_fish,1}.LDS_stimOffset_bin(trial,1) = new_on; 
+% 
+% 
+%     end
+% 
+%      for trial = 1:length(data{no_fish,1}.VibstimuliOnset)
+%         new_on = find(new_time < data{no_fish,1}.binTime(data{no_fish,1}.VibstimuliOnset(trial)));
+%         new_on = new_on(end); 
+%         data{no_fish,1}.Vib_stimOn_bin(trial,1) = new_on; 
+% 
+% 
+%     end
+% 
+% 
+% end
 
 
 end

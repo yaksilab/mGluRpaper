@@ -62,8 +62,8 @@ clear data_path_temp temp
 %% Loading the data
 % Identify all folders where each single experiment is found (1 plate) and load simultaneously both XY and distance
 % data into one cell per fish
-wrongsheet = 1; % if you used the vibration codes before we fixed it 2.09.24 please make this 1! 
-restricted = 0; % this is only for the CPPGinj21dpf date
+wrongsheet = 0; % if you used the vibration codes before we fixed it 2.09.24 please make this 1! 
+restricted = 1; % this is only for the CPPGinj21dpf date
 tic
 [all_fish]=[];
 for i=1:size(metadata.stk_files,1)
