@@ -19,7 +19,7 @@ Each Figure has it's own matlab script and the implemented functions are collect
   - Load in the corresponding data / replace the data path and replace the save path for your system
   -	When running the script each subfigure will be generated and saved.
 ### Fig 2E-F and Fig 5D-H
-	- Please refer to the READ ME file of the subfolder. 
+	-Please refer to the READ ME file of the subfolder. 
 ### Fig 3
   -	This script with generate Figure 3 and Suppl. Figure 3A-C.
   -	Load in the corresponding data / replace the data path and replace the save path for your system (note: there is a data file for each experiment)
