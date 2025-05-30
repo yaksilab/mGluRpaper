@@ -15,7 +15,7 @@ save_path = 'X:\anna\Manuscript\Data and matlab\FigData';
 no_group = size(dff_fist,1); 
 group_names = {'NoINj', 'Con', 'CPPG'}
 
-%% for mglurs mutant
+%% for mglurs mutant as a supplementary figure 
 dff_fist = combined_mGluR_multimodal.dff_fish;
 brain_regions = combined_mGluR_multimodal.brain_regions; 
 positions = combined_mGluR_multimodal.positions;
@@ -75,9 +75,23 @@ for group = 1: no_group
 end
 close all;
 
-% temp changing the brain regions to the new list
+%% Plots for supplementary figures 
+% To look at the non injected vs control fish will automatically be
+% generated in this code as the non inj fish where added as group1 in the
+% data
+
+% The midbrain data is also added. Run the "finding_midbrain" in the
+% Subfunction and replace all the "brain_region" variable with 15 (midbrain) instead
+% of 11 (which is Hb)
+
+% To look as the dorsal vs ventral list run this code to temporarily changing the brain regions to the new list
 % temp_brainregion = brain_regions; 
-% brain_regions = dv_list;
+% brain_regions = dv_list; 
+%use dv list to look at the Hb neurons split in dorsal and ventral, replace
+%the brain regions with 1 for dorsal and with 2 for ventral whereever this
+%is applicable 
+%The rest of the code will just function as normal 
+% NOTE: this is only applicable to the CPPG injected fish data
 %% Responding cells
 
 % Calculate the responding cells for the different conditions
@@ -214,7 +228,6 @@ p_val_10s.p_val_neg = p_val_neg_period
 save(fullfile(save_path, 'pval_resp_10s.mat'), 'p_val_10s')
 
 %% Uni vs. Mulitmodal cells (Selectivity)
-
 
 % first I could just collect all of the dff values both for the heatmap and
 % for the scatter plot

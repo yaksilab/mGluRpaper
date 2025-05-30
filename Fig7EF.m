@@ -1,102 +1,24 @@
 %% Fig7EF
 
-% 
-%% General Info mGluR mutant
+%% General Info 
 
-% Data paths 
-metadata.data_path ='W:\Anna\mGluR LDS\mGluRBehav\'; %folder where data for experiment is found and saved
-metadata.stk_files   = dir(fullfile(metadata.data_path, '*Exp*')); 
+% Load in the data by dropping in the file or using load("YOUR URL")
+metadata.data_save='X:\anna\Manuscript\Data and matlab\FigData\Fig7'; %replace the save path for your device 
+load("X:\anna\code\Repositories\mGluRpaper\Subfunctions\beachVibes.mat") % replace with your link
 
-% ENTER VARIABLEs FROM EXPERIMENTS
-metadata.NumberArena=6; %enter the numbers of arenas used in your aquisition
-metadata.numStimuli = 10; %number of stimuli used in protocol  
+group_names = {'NO', 'Con','CPPG'}; %change the group names 
+% group_names = {'Wt', 'Het','Hom'}; %change the group names depending on the experiment you look at
 
-metadata.GroupName=char('Wt','Het','Hom'); %add group names %BT:indicates days of treatment
-group_names = {'Wt','Het','Hom'};
-% Table path
-table_path = dir(fullfile(metadata.data_path, '*.xlsx')); %define path of excel table with infos about experiments
-T= readtable([table_path(1).folder filesep table_path(1).name]); %read table 
-disp('Table read.')
-
-clear table_path
-metadata.data_save='X:\anna\Manuscript\Data and matlab\FigData\Fig7'; %[metadata.data_path 'Analyzed' filesep];
-load("X:\anna\code\Repositories\Anna-Code-Collection\everyday functions\beachVibes.mat")
-
-%% General Info CPPG inj
-
-% Data paths 
-metadata.data_path = 'W:\Anna\CPPGbehav21dpf\';
-metadata.stk_files   = dir(fullfile(metadata.data_path, '*Exp*')); 
-
-% ENTER VARIABLEs FROM EXPERIMENTS
-metadata.NumberArena= 6; %enter the numbers of arenas used in your aquisition
-metadata.numStimuli = 10; %number of stimuli used in protocol LDS 
-
-metadata.GroupName = char('NO', 'Con','CPPG'); %add group names %BT:indicates days of treatment
-group_names = {'NO', 'Con','CPPG'}; 
-% Table path
-table_path = dir(fullfile(metadata.data_path, '*.xlsx')); %define path of excel table with infos about experiments
-T = readtable([table_path(1).folder filesep table_path(1).name]); %("W:\Anna\CPPGbehav21dpf\CPPG_inj_21dpf.xlsx"); %read table [table_path(1).folder filesep table_path(1).name]
-disp('Table read.')
-
-clear table_path
-metadata.data_save='X:\anna\Manuscript\Data and matlab\FigData\Fig7\CPPG\'; %[metadata.data_path 'Analyzed' filesep];
-load("X:\anna\code\Repositories\Anna-Code-Collection\everyday functions\beachVibes.mat")
-%% Loading the data 
-% Identify all folders where each single experiment is found (1 plate) and load simultaneously both XY and distance
-% data into one cell per fish
-
-tic
-[all_fish]=[];
-for i=24:size(metadata.stk_files,1)
-data_path_temp=[metadata.stk_files(i).folder filesep metadata.stk_files(i).name filesep] %load data from subfolders
-[temp] = AO_loadCSVfileZantiks(data_path_temp, metadata, T); %restructure data to have all information from one fish in one cell
-[all_fish] = cat(1, all_fish, temp); %make variable with information of all fish together
-data_path_temp=[];
-temp=[];
-end
-toc
-
-clear data_path_temp temp
-
-%% Loading the data
-% Identify all folders where each single experiment is found (1 plate) and load simultaneously both XY and distance
-% data into one cell per fish
-wrongsheet = 0; % if you used the vibration codes before we fixed it 2.09.24 please make this 1! 
-restricted = 1; % this is only for the CPPGinj21dpf date
-tic
-[all_fish]=[];
-for i=1:size(metadata.stk_files,1)
-data_path_temp=[metadata.stk_files(i).folder filesep metadata.stk_files(i).name filesep] %load data from subfolders
-[temp] = AO_loadCSVfileZantiksUpdated(data_path_temp, metadata, T, wrongsheet, restricted, metadata.stk_files(i).name); %restructure data to have all information from one fish in one cell
-[all_fish] = cat(1, all_fish, temp); %make variable with information of all fish together
-data_path_temp=[];
-temp=[];
-end
-toc
-
-clear data_path_temp temp
-
-
-%% Save data, specify experiment
-%make a folder to save data
-mkdir([metadata.data_path 'Analyzed' filesep]); %make a new folder to save analyzed data
-metadata.data_save=[metadata.data_path 'Analyzed' filesep]; %put info into structure
-save([metadata.data_save 'all_fish_data.mat'] , 'all_fish', 'metadata', '-v7.3'); %save variable 'all_fish' and 'cfg' = metadata
-
+load("X:\anna\code\Repositories\mGluRpaper\Subfunctions\beachVibes.mat") % replace with your link
 
 
 %% Now I want to make my group variables 
 groups_LDS = cell(size(metadata.GroupName,1),1); % this is for the LDS
-groups_Vib = cell(size(metadata.GroupName,1),1); % this is for the startle resp
+
 for fish = 1:size(all_fish,1)
     if all_fish{fish, 1}.group ~= 0
         if all_fish{fish,1}.stable == 1
             groups_LDS{all_fish{fish, 1}.group,1}(end +1) = fish; 
-        end
-        if all_fish{fish,1}.stableVib == 1
-           groups_Vib{all_fish{fish, 1}.group,1}(end +1) = fish; 
-    
         end
     end
 
@@ -137,19 +59,9 @@ end
 sgtitle(num2str(metadata.data_path))
 saveas(gcf, fullfile(metadata.data_save, ['Heatmap_exp.png']))
 saveas(gcf, fullfile(metadata.data_save, ['Heatmap_exp.svg']))
+
 % Plot curves for averaged activity with SEM
 
-% clear BinBinDistance temp
-% time=all_fish{1, 1}.binTime(1:end-1); %define x-axis
-% %define nice green
-% %nicegreen=[153,204,153]/255;%divide by 255 to normalize the values
-% col=char('b','c','m');
-% 
-% binSize=10; %how many seconds to bin. The users can change the bin size.
-% binTime=(1:binSize:floor(length(BinDistance)/binSize)*binSize)/60; %binTime in minute
-% for ii=1:floor(length(BinDistance)/binSize)
-% BinBinDistance(:,ii)=sum(BinDistance(:,ii*binSize-binSize+1:ii*binSize),2);
-% end
 
 figure('units','pixel','Position',[100 100 1500 600])
 %for i=1    %for WT group only
@@ -407,3 +319,6 @@ pval_LDS.(['timebin_on', num2str(time_per) ]) = [p_1; p_2; p_3];
 [p_2, h_2] = quick_statistic(mean(avg_off{1,1},1), mean(avg_off{3,1},1))
 [p_3, h_3] = quick_statistic(mean(avg_off{2,1},1), mean(avg_off{3,1},1))
 pval_LDS.(['timebin_off', num2str(time_per) ]) = [p_1; p_2; p_3];  
+
+
+
