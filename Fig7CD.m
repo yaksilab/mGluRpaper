@@ -30,6 +30,45 @@ end
 
 save([folder_path_save 'all_fish_data.mat'] , 'all_fish', '-v7.3'); %save variable 'all_fish' and 'metadata' = metadata
 
+
+%% Seperate animals into different groups 
+% This is an example of 3 different groups 
+% you might need to add the select column in both the Table and the loading
+% function
+name_group1 = 'Wild Type'; 
+name_group2 = 'Heterozygous';
+name_group3 = 'Homozygous'; 
+
+% In this example NTT and vibration was split into two columns in the
+% metatable and loaded as such
+% here I seperate the groups according to NT 
+% proper_exp = 6:26; 
+group1 = []; %find(T.Group == 1); 
+group2 = []; %find(T.Group == 2);
+group3 = []; %find(T.Group == 3);
+for fish = 1: size(all_fish,1)
+%     if ismember(all_fish{fish, 1}.exp, proper_exp)
+        if all_fish{fish, 1}.NTT == 1
+%             if all_fish{fish, 1}.selected == 1
+                if all_fish{fish, 1}.group == 1
+%                     group1 = [group1; all_fish{fish, 1}.realNum];
+                    group1 = [group1; fish];
+                elseif all_fish{fish, 1}.group == 2
+%                     group2 = [group2; all_fish{fish, 1}.realNum];
+                    group2 = [group2; fish];
+
+                elseif all_fish{fish, 1}.group == 3
+%                     group3 = [group3; all_fish{fish, 1}.realNum];
+                    group3 = [group3; fish];
+
+                end
+%             end
+        end
+%     end
+end
+
+%for some codes you still need the total number of fish, nROIS 
+nROIs = size(all_fish,1);
 %% Additional variables 
 % now we want to make some additional variables to make the plotting and
 % everything easier later on

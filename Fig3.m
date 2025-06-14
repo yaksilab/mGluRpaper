@@ -3,8 +3,8 @@
 %% CPPG 
 
 % Loading the data 
-load('X:\anna\Manuscript\FigData\Fig3\Fig3_cppg_2p_exvivo.mat')
-save_path = 'X:\anna\Manuscript\FigData\Fig3';
+load('X:\anna\Manuscript\Data and matlab\FigData\Fig3\Fig3_cppg_2p_exvivo.mat')
+save_path = 'X:\anna\Manuscript\Data and matlab\FigData\Fig3\Fig3';
 % Now we can then load this way: 
 dff_fish = cppg_2p_exvivo.dff_traces ; 
 positions = cppg_2p_exvivo.position  ; 
@@ -94,7 +94,7 @@ saveas(gcf, fullfile(save_path, ['Affected_cells_CPPG.svg']))
 
 %% L-AP4
 % Loading 
-load('X:\anna\Manuscript\FigData\Fig3\Fig3_lap4_2p_exvivo.mat')
+load('X:\anna\Manuscript\Data and matlab\FigData\Fig3\Fig3_lap4_2p_exvivo.mat')
 save_path = 'X:\anna\Manuscript\Data and matlab\FigData\Fig3';
 % Now we can then load this way: 
 fish_dff = lap4_2p_exvivo.dff_traces ; 
@@ -104,7 +104,7 @@ fish_red_cells = lap4_2p_exvivo.redcells;
 % baseline_time = lap4_2p_exvivo.baseline_time ;
 baseline_per = lap4_2p_exvivo.baseline_drug_per(1,:);
 drug_per= lap4_2p_exvivo.baseline_drug_per(2,:);
-
+fra_rat_two_pho = 22.58/8;
 % Affected cells per region
 
 baseline_per = [floor(600*fra_rat_two_pho)-400:floor(600*fra_rat_two_pho)-50]; % minute 8-10; 
@@ -146,22 +146,22 @@ for fish = 1:6
             end
         end
         resp_idx_region{cu_region,fish} = affected_neurons; 
-        subplot(2,3, fish)
-        % now lets do ratios
-        hold on
-        b2 = bar([0.75]+(cu_region-1), [length(find(affected_neurons == 1))/length(affected_neurons)])
-        b2.FaceColor = cmap(3,:);
-        b2.FaceAlpha = 0.5;
-        b3 = bar([1.25]+(cu_region-1), [length(find(affected_neurons == 0))/length(affected_neurons)])
-        b3.FaceColor = red_map(1,:);
-        b3.FaceAlpha = 0.5;
-        legend([b2 b3], {'Affected', 'Not'})
-        title(names{fish})
-        ylabel('Ratio Affected')
-        ylim([0 1])
+    %     subplot(2,3, fish)
+    %     % now lets do ratios
+    %     hold on
+    %     b2 = bar([0.75]+(cu_region-1), [length(find(affected_neurons == 1))/length(affected_neurons)])
+    %     b2.FaceColor = cmap(3,:);
+    %     b2.FaceAlpha = 0.5;
+    %     b3 = bar([1.25]+(cu_region-1), [length(find(affected_neurons == 0))/length(affected_neurons)])
+    %     b3.FaceColor = red_map(1,:);
+    %     b3.FaceAlpha = 0.5;
+    %     legend([b2 b3], {'Affected', 'Not'})
+    %     title(names{fish})
+    %     ylabel('Ratio Affected')
+    %     ylim([0 1])
         affected_per_region(fish, cu_region) = length(find(affected_neurons == 1))/length(affected_neurons); 
-     xticks([1:9])
-    xticklabels(brain_names)
+    %  xticks([1:9])
+    % xticklabels(brain_names)
 
 
         % now adding the random part 
@@ -268,26 +268,26 @@ for fish = 1:6
             affected_neurons(neuron) = 0;
         end
     end
-    figure('units','centimeters','Position',[2 2 32 14])
-    red_cell_list = affected_neurons(find(hab_red == 1)); 
-    nonred_list = affected_neurons(find(hab_red == 0)); 
-    % now lets do ratios
-    b2 = bar([0.75 1.75], [length(find(red_cell_list == 1))/length(red_cell_list) length(find(red_cell_list == 0))/length(red_cell_list)])
-    b2.FaceColor = red_map(2,:);
-    b2.FaceAlpha = 0.5;
-    hold on 
-     b3 = bar([1.25 2.25], [length(find(nonred_list == 1))/length(nonred_list) length(find(nonred_list == 0))/length(nonred_list)])
-    b3.FaceColor = red_map(1,:);
-    b3.FaceAlpha = 0.5;
-    xticks([1 2])
-    xticklabels({'Affected', 'Not'})
-%     legend([b2 b3])
-    title(names{fish})
-    ylabel('Ratio Affected')
-    ylim([0 1])
-%     saveas(gcf, fullfile(save_path, [num2str(fish), '_Fig4_Hbratioresp.png']))
-%     saveas(gcf, fullfile(save_path, [num2str(fish), '_Fig4_Hbratioresp.svg']))
-    close; 
+%     figure('units','centimeters','Position',[2 2 32 14])
+%     red_cell_list = affected_neurons(find(hab_red == 1)); 
+%     nonred_list = affected_neurons(find(hab_red == 0)); 
+%     % now lets do ratios
+%     b2 = bar([0.75 1.75], [length(find(red_cell_list == 1))/length(red_cell_list) length(find(red_cell_list == 0))/length(red_cell_list)])
+%     b2.FaceColor = red_map(2,:);
+%     b2.FaceAlpha = 0.5;
+%     hold on 
+%      b3 = bar([1.25 2.25], [length(find(nonred_list == 1))/length(nonred_list) length(find(nonred_list == 0))/length(nonred_list)])
+%     b3.FaceColor = red_map(1,:);
+%     b3.FaceAlpha = 0.5;
+%     xticks([1 2])
+%     xticklabels({'Affected', 'Not'})
+% %     legend([b2 b3])
+%     title(names{fish})
+%     ylabel('Ratio Affected')
+%     ylim([0 1])
+% %     saveas(gcf, fullfile(save_path, [num2str(fish), '_Fig4_Hbratioresp.png']))
+% %     saveas(gcf, fullfile(save_path, [num2str(fish), '_Fig4_Hbratioresp.svg']))
+%     close; 
     collected_ratio = [collected_ratio; [length(find(nonred_list == 1))/length(nonred_list) length(find(nonred_list == 0))/length(nonred_list)]];
     collected_red_Rat = [collected_red_Rat; [length(find(red_cell_list == 1))/length(red_cell_list) length(find(red_cell_list == 0))/length(red_cell_list)]];
     
@@ -328,6 +328,6 @@ er.LineStyle = 'none';
 
 % saveas(gcf, fullfile(save_path, ['Fig4_Hbratioresp2.png']))
 % saveas(gcf, fullfile(save_path, ['Fig4_Hbratioresp2.svg']))
-[p, h] = quick_statistic(collected_red_Rat(:,1), collected_ratio(:,1))
+[p, h] = quick_statistic_signrank(collected_red_Rat(:,1), collected_ratio(:,1))
 saveas(gcf, fullfile(save_path, ['DAOcells_LAP4.png']))
 saveas(gcf, fullfile(save_path, ['DAOcells_LAP4.svg']))

@@ -23,8 +23,8 @@ end
 timpoint_start = 1;
 timpoint_end = 120;
 
-timpoint_start = 780;
-timpoint_end = 900;
+% timpoint_start = 780;
+% timpoint_end = 900;
 
 y_timebin_group1= y_min(1,timpoint_start:timpoint_end, 1:size(y_position_mGluR6a_NTT{1,1},2)); %(group, number of timebin, fish)
 y_timebin_group2= y_min(2,timpoint_start:timpoint_end, 1:size(y_position_mGluR6a_NTT{1,2},2));

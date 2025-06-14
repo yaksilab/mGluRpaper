@@ -717,7 +717,7 @@ saveas(fig2, fullfile(save_path, ['AmplitudeHbCONDRU_L.svg']))
 saveas(fig2, fullfile(save_path, ['AmplitudeHbCONDRU_L.png']))
 
 %% Fig5
-stim_times = results.stim_triggers; 
+% stim_times = results.stim_triggers; 
 all_on = [230, stim_times(1)-100, stim_times(9)-100, stim_times(17)-100];
 all_off = [2000, stim_times(8)+100, stim_times(16)+100, stim_times(24)+100];
 n_clusters = 5; 
@@ -779,7 +779,7 @@ for group = 1:no_group
     fish_curr_neg = nan(size(all_pairs_fish{group,1},1),1);
     for fish = 1:size(all_pairs_fish{group,1},1)
         curr_pairs = all_pairs_fish{group,1}{fish,con};
-        sign_ones = find(curr_pairs(:,3)<= 0.001);
+        sign_ones = find(curr_pairs(:,3)<= 0.05);
         curr_pairs_sign = curr_pairs(sign_ones, :); 
         posit = find(curr_pairs_sign(:,2)>= 0);
         negat = find(curr_pairs_sign(:,2) < 0);
@@ -832,14 +832,14 @@ xticks([1 2])
 xticklabels({'Pos', 'Neg'})
 xlim([0 3])
 hold off
-title('Avg dist p val 0.001')
+title('Avg dist p val 0.05')
 ylabel('Avg Distance ')
 % legend([b3 b2], group_names{[1 2]})
 % legend('Location', 'eastoutside')
 % ylim([0 65])
-saveas(gcf, fullfile(save_path, ['posandnefavgdistp_val0.001.png']))
-saveas(gcf, fullfile(save_path, [ 'posandnefavgdistp_val0.001.svg']))
-[p_con, h] = quick_statistic_signrank(avg_dist_pos{2,1}, avg_dist_neg{2,1})
+saveas(gcf, fullfile(save_path, ['posandnefavgdistp_val0.05.png']))
+saveas(gcf, fullfile(save_path, [ 'posandnefavgdistp_val0.05.svg']))
+[p_con, h] = quick_statistic_signrank(avg_dist_pos{1,1}, avg_dist_neg{1,1})
 save(fullfile(save_path, 'p_val_avgdist.mat'), 'p_con')
 %% Anova for corr vs dist
 

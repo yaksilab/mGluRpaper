@@ -1,7 +1,7 @@
 %% Fig1 
 
 %load the dataset 
-load("X:\anna\Manuscript\CollectedData\Fig1\Collected_data_all_fish_fig1_extraodors.mat"); % this is now the data of all the fish
+load("X:\anna\Manuscript\CollectedData_Ostenrath_et_al_2025\Fig1\Collected_data_all_fish_fig1_extraodors.mat"); % this is now the data of all the fish
 load("X:\anna\code\Repositories\mGluRpaper\Subfunctions\beachVibes.mat")
 save_path = 'X:\anna\Manuscript\Data and matlab\FigData\Fig1new'; %replace with your path
 

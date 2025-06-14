@@ -13,26 +13,10 @@ load("X:\anna\code\Repositories\mGluRpaper\Subfunctions\beachVibes.mat") % repla
 
 
 %% Now I want to make my group variables 
-groups_LDS = cell(size(metadata.GroupName,1),1); % this is for the LDS
-groups_Vib = cell(size(metadata.GroupName,1),1); % this is for the startle resp
-for fish = 1:size(all_fish,1)
-    if all_fish{fish, 1}.group ~= 0
-        if all_fish{fish,1}.stable == 1
-            groups_LDS{all_fish{fish, 1}.group,1}(end +1) = fish; 
-        end
-        if all_fish{fish,1}.stableVib == 1
-           groups_Vib{all_fish{fish, 1}.group,1}(end +1) = fish; 
-    
-        end
-    end
+group_NTT = metadata.groups.groupsNTT; % this is for the LDS
+groups_Vib = metadata.groups.groupsVib; % this is for the startle resp
 
-end
-no_group = size(metadata.GroupName,1);
-
-group_NTT = groups_LDS; 
-group_NTT{2,1}(4) = [];
-group_NTT{3,1}(18) = [];
-
+no_group = size(group_NTT,1)
 %% Plotting background 
 cmap_wt = ['E4E6EB'; 'B0B3B8'; '18191A']; 
 cmap_het = ['00FFFF'; '40E0D0'; '008080'];
